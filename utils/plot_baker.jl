@@ -88,42 +88,83 @@ function plot_one_step()
 	ax1.set_ylim([0.,2*pi])
 end
 function plot_mapping_vs_params()
-	n_pts = 101
-	x_pts = LinRange(0, 2*pi, n_pts)	
-	x_pts = x_pts[1:end-1]
-	n_pts = n_pts - 1
+	n_xpts, n_ypts = 75, 75
+	x_pts = LinRange(0, 2*pi, n_xpts)	
+	#x_pts = x_pts[1:end-1]
+	#n_xpts = n_xpts - 1
 
-	cm = plt.get_cmap("coolwarm")
-	clrs = cm(x_pts/(2*pi))
-	x_gr = repeat(x_pts, 1, n_pts)
-	y_gr = x_gr'
+	y_pts = LinRange(0, 2*pi, n_ypts)	
+	#y_pts = y_pts[1:end-1]
+	#n_ypts = n_ypts - 1
+
+
+	cm = plt.get_cmap("winter")
+	x_gr = repeat(x_pts, 1, n_ypts)
+	y_gr = repeat(y_pts', n_xpts, 1)
+	x_gr = x_gr[:]
+	y_gr = y_gr[:]
+	n_gr = length(x_gr)
+
+	#n_xpts = n_xpts + 1
+	#n_ypts = n_ypts + 1
+	eps = 1.e-1
+	x_pts = LinRange(eps, 2*pi, n_xpts)	
+	#x_pts = x_pts[1:end-1]
+	#n_xpts = n_xpts - 1
+
+	y_pts = LinRange(eps, 2*pi, n_ypts)	
+	#y_pts = y_pts[1:end-1]
+	#n_ypts = n_ypts - 1
 	
+	x_gr1 = repeat(x_pts, 1, n_ypts)
+	y_gr1 = repeat(y_pts', n_xpts, 1)
+	
+	x_gr1 = x_gr1[:]
+	y_gr1 = y_gr1[:]
+
+
 	for n = 1:4
 		s = zeros(4)
 		s[n] = 1.0
 	
-		x1_gr = zeros(n_pts, n_pts)
-		y1_gr = zeros(n_pts, n_pts)
+		x1_gr = zeros(n_gr)
+		y1_gr = zeros(n_gr)
 
-		for j = 1:n_pts, i = 1:n_pts
-			x1_gr[i,j], y1_gr[i,j] = 
-				step([x_gr[i,j], y_gr[i,j]]
+		for i = 1:n_gr
+			x1_gr[i], y1_gr[i] = 
+				step([x_gr[i], y_gr[i]]
 					, s, 1)[:,end]
 		end
 		# Horizontal lines
 		fig1, ax1 = subplots(1,1)
-		cplot1 = ax1.contour(x1_gr, y1_gr, y_gr, n_pts, 
-					   cmap=cm)
-		cbar = fig.colorbar(cplot1, ax=ax1)
+		clrs = cm(y_gr/(2*pi))
+		sp1 = ax1.scatter(x1_gr, y1_gr, s=40.0,
+						  c=clrs, marker="_", 
+					   	  cmap=cm)
+		#cbar = fig.colorbar(sp1, ax=ax1)
 
+	
 		# Vertical lines
-		ax1.contour(x1_gr', y1_gr', y_gr, n_pts, cmap=cm)
+		x1_gr1 = zeros(n_gr)
+		y1_gr1 = zeros(n_gr)
+
+		for i = 1:n_gr
+			x1_gr1[i], y1_gr1[i] = 
+				step([x1_gr1[i], y1_gr1[i]]
+					, s, 1)[:,end]
+		end
+
+
+		clrs = cm(x_gr1/(2*pi))
+		ax1.scatter(x_gr1, y_gr1, s=40.0, 
+					marker="|",c=clrs, cmap=cm)
 		ax1.xaxis.set_tick_params(labelsize=28)
 		ax1.yaxis.set_tick_params(labelsize=28)
-		cbar.ax.tick_params(labelsize=28)
 		ax1.axis("scaled")
 		ax1.set_xlim([0.,2*pi])
 		ax1.set_ylim([0.,2*pi])
+		ax1.set_title("\$s_$n = 1\$", fontsize=28)
+		
 	end
 end
 
