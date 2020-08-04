@@ -9,8 +9,9 @@ function step(x, s, n)
 		y1 = (0.5*y + 
 			(s[4] + s[3]*sx)*sy)   
 		
-		x_trj[1,i] = x < pi ? x1 : 4*pi - x1
+		x_trj[1,i] = x < pi ? x1 : x1 - 2*pi 
 		x_trj[2,i] = x < pi ? y1 : y1 + pi
+
 
 	end
 	return x_trj

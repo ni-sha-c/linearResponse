@@ -1,12 +1,11 @@
 include("../examples/baker.jl")
 using PyPlot
 function plot_one_step()
-	n_pts = 50
+	n_pts = 51
 	x_pts = LinRange(0, 2*pi, n_pts)	
-	#x_pts = x_pts[1:end-1]
-	#n_pts = n_pts - 1
+	x_pts = x_pts[1:end-1]
+	n_pts = n_pts - 1
 	cm = plt.get_cmap("coolwarm")
-	clrs = cm(x_pts/(2*pi))
 	x_gr = repeat(x_pts, 1, n_pts)
 	y_gr = x_gr'
 
@@ -20,8 +19,9 @@ function plot_one_step()
 	ax.contour(y_gr, x_gr, y_gr, n_pts, cmap=cm)
 	
 	# Iterate once
-	x1_gr = zeros(n_pts, n_pts)
-	y1_gr = zeros(n_pts, n_pts)
+	n_pts_half = div(n_pts, 2)
+	x1_gr = zeros(n_pts_half, n_pts)
+	y1_gr = zeros(n_pts_half, n_pts)
 
 	for j = 1:n_pts, i = 1:n_pts
 		x1_gr[i,j], y1_gr[i,j] = 
@@ -30,7 +30,9 @@ function plot_one_step()
 	end
 	# Horizontal lines
 	fig1, ax1 = subplots(1,1)
-	cplot1 = ax1.contour(x1_gr, y1_gr, y_gr, n_pts, 
+	cplot1 = ax1.contour(x1_gr, 
+						 y1_gr, 
+						 y_gr, n_pts, 
 					   cmap=cm)
 	cbar = fig.colorbar(cplot1, ax=ax1)
 
@@ -50,17 +52,53 @@ function plot_one_step()
 	ax1.set_ylim([0.,2*pi])
 end
 function plot_mapping_vs_params()
+	n_pts = 101
+	x_pts = LinRange(0, 2*pi, n_pts)	
+	x_pts = x_pts[1:end-1]
+	n_pts = n_pts - 1
 
+	cm = plt.get_cmap("coolwarm")
+	clrs = cm(x_pts/(2*pi))
+	x_gr = repeat(x_pts, 1, n_pts)
+	y_gr = x_gr'
+	
+	for n = 1:4
+		s = zeros(4)
+		s[n] = 1.0
+	
+		x1_gr = zeros(n_pts, n_pts)
+		y1_gr = zeros(n_pts, n_pts)
 
+		for j = 1:n_pts, i = 1:n_pts
+			x1_gr[i,j], y1_gr[i,j] = 
+				step([x_gr[i,j], y_gr[i,j]]
+					, s, 1)[:,end]
+		end
+		# Horizontal lines
+		fig1, ax1 = subplots(1,1)
+		cplot1 = ax1.contour(x1_gr, y1_gr, y_gr, n_pts, 
+					   cmap=cm)
+		cbar = fig.colorbar(cplot1, ax=ax1)
 
-
-
-
-
-
-
-
-
-
-
+		# Vertical lines
+		ax1.contour(x1_gr', y1_gr', y_gr, n_pts, cmap=cm)
+		ax1.xaxis.set_tick_params(labelsize=28)
+		ax1.yaxis.set_tick_params(labelsize=28)
+		cbar.ax.tick_params(labelsize=28)
+		ax1.axis("scaled")
+		ax1.set_xlim([0.,2*pi])
+		ax1.set_ylim([0.,2*pi])
+	end
 end
+
+
+
+
+
+
+
+
+
+
+
+
