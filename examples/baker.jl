@@ -1,13 +1,17 @@
 function step(x, s, n)
-	x_trj = zeros(2, n)
+	x_trj = zeros(2, n+1)
 	x_trj[:,1] = x
-	for i = 2:n
+	for i = 2:n+1
 		x, y = x_trj[1,i-1],x_trj[2,i-1]
 		sx, sy = sin(x), sin(2*y)/2
-		x_trj[1,i] = 2*x + 
-			(s[1] + s[2]*sy)*sx
-		x_trj[2,i] = 0.5*y + 
-			(s[4] + s[3]*sx)*sy
+		x1 = (2*x + 
+			(s[1] + s[2]*sy)*sx) 
+		y1 = (0.5*y + 
+			(s[4] + s[3]*sx)*sy)   
+		
+		x_trj[1,i] = x < pi ? x1 : 4*pi - x1
+		x_trj[2,i] = x < pi ? y1 : y1 + pi
+
 	end
 	return x_trj
 end
