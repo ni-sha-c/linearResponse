@@ -24,7 +24,7 @@ function plot_one_step()
 	for j = 1:n_yq, i = 1:n_xq
 		x1_q[i,j], y1_q[i,j] = 
 			step([x_q[i,j], y_q[i,j]]
-				, zeros(4), 1)[:,end]
+				, zeros(4), 1)
 	end
 	cplot1 = ax1.contour(x1_q, y1_q, y_q, n_yq, 
 					   cmap=cm)
@@ -59,7 +59,7 @@ function plot_one_step()
 	for j = 1:n_yq, i = 1:n_xq
 		x1_q[i,j], y1_q[i,j] = 
 			step([x_q[i,j], y_q[i,j]]
-				, zeros(4), 1)[:,end]
+				, zeros(4), 1)
 	end
 	cplot1 = ax1.contour(x1_q, y1_q, y_q, n_yq, 
 					   cmap=cm)
@@ -133,7 +133,7 @@ function plot_mapping_vs_params()
 		for i = 1:n_gr
 			x1_gr[i], y1_gr[i] = 
 				step([x_gr[i], y_gr[i]]
-					, s, 1)[:,end]
+					, s, 1)
 		end
 		# Horizontal lines
 		fig1, ax1 = subplots(1,1)
@@ -151,7 +151,7 @@ function plot_mapping_vs_params()
 		for i = 1:n_gr
 			x1_gr1[i], y1_gr1[i] = 
 				step([x1_gr1[i], y1_gr1[i]]
-					, s, 1)[:,end]
+					, s, 1)
 		end
 
 

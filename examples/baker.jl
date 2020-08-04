@@ -14,7 +14,7 @@ function step(x, s, n)
 
 
 	end
-	return x_trj
+	return x_trj[:,end]
 end
 function dstep(u,s)
 	n = size(u)[2]
