@@ -30,3 +30,21 @@ function dstep(u,s)
 				s[3]*sx.*dsy
 	return du
 end
+function pert(u, p)
+	n = size(u)[2]
+	x, y = view(u,1,:), view(u,2,:)
+	sx, sy = sin.(x), sin.(2*y)./2
+	if p==1
+		return reshape([sx zeros(n)],n,2)'
+	elseif p==2
+		return reshape([sy.*sx zeros(n)],n,2)' 
+	elseif p==3
+		return reshape([zeros(n) sy.*sx],n,2)' 
+	elseif p==4
+		return reshape([zeros(n) sy],n,2)'
+	else
+		println("parameter perturbation is only defined 
+				for indices 1 through 4")
+		return 0
+	end
+end
