@@ -2,7 +2,7 @@ include("../examples/baker.jl")
 using PyPlot
 using JLD
 function obj_fun(x,y)
-	return sin(2*x) + cos(4*y)	
+		return cos(4*y)	
 end
 function plot_obj_fun()
 
@@ -25,17 +25,16 @@ function plot_obj_fun()
 
 end
 function obj_fun_erg_avg(s)
-	nSteps = 10000
-	u = rand(2)
+	nSteps = 9999
+	u = 2*pi*rand(2)
 	J = 0.
-	for n = 1:nSteps
-		x, y = u
-		J += obj_fun(x, y)/nSteps
-		u = step(u,s,1)[:,end]
-	end
+	u_trj = step(u,s,nSteps)
+	x, y = view(u_trj,1,:), view(u_trj,2,:)
+	nSteps = nSteps + 1
+	J = sum(obj_fun.(x,y)/nSteps)
 	return J
 end
-function plot_J_vs_s()
+function plot_Javg_vs_s(ind)
 	fig, ax = subplots(1,1)
 	s = zeros(4)
 	n_pts = 100
@@ -44,22 +43,22 @@ function plot_J_vs_s()
 	J = zeros(n_pts)
 	for i = 1:n_pts
 		@show s2[i]
-		s[4] = s2[i]
+		s[ind] = s2[i]
 		for n=1:n_rep
 			J[i] += obj_fun_erg_avg(s)/n_rep
 		end
 	end
-	save("../data/obj_erg_avg/sin2x_cos4y_s4.jld",
-		 "s4", s2,
+	save("../data/obj_erg_avg/cos4y_s4.jld",
+		 "s$ind", s2,
 		"J", J)
 	ax.plot(s2, J, ".", ms=4.0)
 	ax.xaxis.set_tick_params(labelsize=28)
 	ax.yaxis.set_tick_params(labelsize=28)
-	ax.set_xlabel(L"$s_4$",fontsize=28)
+	ax.set_xlabel("\$s_$ind\$",fontsize=28)
 	ax.set_ylabel(L"$\langle J\rangle$",fontsize=28)
 end
 
-function obj_fun_erg_avg()
+function plot_obj_fun_erg_avg()
 
 	n_xpts, n_ypts = 100, 100
 	eps = 1.e-8
