@@ -1,5 +1,6 @@
 include("../examples/baker.jl")
 using PyPlot
+using JLD
 function obj_fun(x,y)
 	return sin(2*x) + cos(4*y)	
 end
@@ -43,16 +44,18 @@ function plot_J_vs_s()
 	J = zeros(n_pts)
 	for i = 1:n_pts
 		@show s2[i]
-		s[2] = s2[i]
+		s[4] = s2[i]
 		for n=1:n_rep
 			J[i] += obj_fun_erg_avg(s)/n_rep
 		end
 	end
-
+	save("../data/obj_erg_avg/sin2x_cos4y_s4.jld",
+		 "s4", s2,
+		"J", J)
 	ax.plot(s2, J, ".", ms=4.0)
 	ax.xaxis.set_tick_params(labelsize=28)
 	ax.yaxis.set_tick_params(labelsize=28)
-	ax.set_xlabel(L"$s_2$",fontsize=28)
+	ax.set_xlabel(L"$s_4$",fontsize=28)
 	ax.set_ylabel(L"$\langle J\rangle$",fontsize=28)
 end
 
