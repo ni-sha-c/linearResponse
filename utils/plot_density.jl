@@ -1,7 +1,8 @@
-#using PyPlot
+using PyPlot
 include("../examples/baker.jl")
 using JLD
 using SharedArrays
+using Distributed
 function plot_smooth_indicator()
 	fig = figure() 
 	ax = fig.add_subplot(111, projection="3d")
@@ -95,7 +96,26 @@ function get_dist()
 	s[1] = 1.0
 	compute_indicator_density(s)
 end
+function plot_density()
+	#assumes get_dist() has been run
+	s = zeros(4)
+	s[1] = 1.0
+	X = load(string("../data/SRB_dist/ind_dist_", 
+				   "$s","_.jld"))
+	rho = X["rho"]
+	n_x, n_y = size(rho)
+	x = LinRange(0.,2*pi,n_x)
+	y = LinRange(0.,2*pi,n_y)
+	x_g = repeat(x, 1, n_y)
+	y_g = repeat(y', n_x, 1)
 
-
-
-
+	fig, ax = subplots(1,1)
+	cplot = ax.contour(x_g, y_g, rho, n_x,
+					   cmap="Blues",vmin=0.,
+					   vmax=1.0)
+	cbar = fig.colorbar(cplot,ax=ax)
+	ax.xaxis.set_tick_params(labelsize=28)
+	ax.yaxis.set_tick_params(labelsize=28)
+	cbar.ax.tick_params(labelsize=28)
+	ax.set_title("\$ s_1 = $(s[1]) \$",fontsize=28)
+end
