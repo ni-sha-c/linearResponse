@@ -1,5 +1,6 @@
 using PyPlot
 using JLD
+using DelimitedFiles
 include("get_srb.jl")
 function plot_smooth_indicator()
 	fig = figure() 
@@ -33,24 +34,33 @@ function plot_smooth_indicator()
 end
 function plot_density()
 	#assumes get_dist() has been run
-	s = zeros(4)
-	s[1] = 1.0
-	X = load(string("../data/SRB_dist/ind_dist_", 
-				   "$s","_.jld"))
-	rho = X["rho"]
-	n_x, n_y = size(rho)
-	x = LinRange(0.,2*pi,n_x)
-	y = LinRange(0.,2*pi,n_y)
-	x_g = repeat(x, 1, n_y)
-	y_g = repeat(y', n_x, 1)
-
-	fig, ax = subplots(1,1)
-	cplot = ax.contour(x_g, y_g, rho, n_x,
-					   cmap="Blues",vmin=0.,
-					   vmax=1.0)
-	cbar = fig.colorbar(cplot,ax=ax)
-	ax.xaxis.set_tick_params(labelsize=28)
-	ax.yaxis.set_tick_params(labelsize=28)
-	cbar.ax.tick_params(labelsize=28)
-	ax.set_title("\$ s_1 = $(s[1]) \$",fontsize=28)
+	fp = "../data/SRB_dist/"
+	files = readdlm(string(fp, "files"), '\n')
+	s = Array{String,1}(undef,4)
+	for f in files
+		s_str = split(string(f), ", ")
+		s[1] = split(s_str[1],r"[a-z]|_|\[")[end]
+		s[2],s[3] = s_str[2],s_str[3]
+		s[4] = split(s_str[4],r"\]|_")[1]
+		for (pind, pv) in enumerate(s)
+			s[pind] = (length(pv) > 3) ? 
+					  pv[1:5] : pv[1:3]
+		end
+		filename = string(fp, string(f))
+		X = load(filename)
+		rho = X["rho"]
+		n_x, n_y = size(rho)
+		x = LinRange(0.,2*pi,n_x)
+		y = LinRange(0.,2*pi,n_y)
+		x_g = repeat(x, 1, n_y)
+		y_g = repeat(y', n_x, 1)
+		fig, ax = subplots(1,1)
+		cplot = ax.contourf(x_g, y_g, rho,
+					   cmap="Blues")
+		cbar = fig.colorbar(cplot,ax=ax)
+		ax.xaxis.set_tick_params(labelsize=28)
+		ax.yaxis.set_tick_params(labelsize=28)
+		cbar.ax.tick_params(labelsize=28)
+		ax.set_title("s = $s ",fontsize=28)
+	end
 end
