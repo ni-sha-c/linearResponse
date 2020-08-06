@@ -1,4 +1,5 @@
 using PyPlot
+using SharedArrays
 function plot_smooth_indicator()
 	fig = figure() 
 	ax = fig.add_subplot(111, projection="3d")
@@ -50,4 +51,37 @@ function smooth_indicator(x1,x2,a1,a2,h1,h2)
 		f2 = cos(pi*(x2-a2+2*pi)/h2)
 	end
 	return f1*f2
+end
+function compute_indicator_density(s)
+	n_xbins, n_ybins = 100, 100
+	dx, dy = 2*pi/n_xbins, 2*pi/n_ybins
+	rho = SharedArray{Float64}(n_xbins, n_ybins)
+	rho .= 0.
+	n_step = 10000
+	n_spl = 10000 
+	n_rep = 10
+	for i = 1:n_rep
+		t = @distributed for i = 1:n_spl
+			u = 2*pi*rand(2)
+			u_trj = step(u, s, n_step-1)
+			x, y = view(u_trj,1,:),view(u_trj,2,:)
+			x_ind = floor.(Int64, x/dx) .+ 1
+			y_ind = floor.(Int64, y/dy) .+ 1
+			rho[(y_ind .- 1)*n_xbins .+ x_ind] .+= 
+					1.0/n_step/n_spl/n_rep
+		end
+		wait(t)
+	end
+	save(string("../data/SRB_dist/ind_dist_", 
+				"$s","_.jld"), "rho", rho)
+end
+function get_dist()
+	s = zeros(4)
+	s[1] = 1.0
+	compute_indicator_density(s)
+end
+
+
+
+
 end
