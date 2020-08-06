@@ -25,14 +25,14 @@ function smooth_indicator(x1,x2,a1,a2,h1,h2)
 	return f1*f2
 end
 function compute_indicator_density(s)
-	n_xbins, n_ybins = 75, 75
+	n_xbins, n_ybins = 200, 200
 	dx, dy = 2*pi/n_xbins, 2*pi/n_ybins
 
 	rho = zeros(n_xbins, n_ybins)
 	rho .= 0.
 	n_step = 10000
 	n_spl = nprocs() - 1 
-	n_rep = 10
+	n_rep = 10000
 	rho_proc = SharedArray{Float64}(n_xbins*n_ybins,
 					 n_spl)
 
@@ -62,6 +62,6 @@ function compute_indicator_density(s)
 end
 function get_dist()
 	s = zeros(4)
-	s[1] = 0.0
+	s[3] = 1.0
 	compute_indicator_density(s)
 end

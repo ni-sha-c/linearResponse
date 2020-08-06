@@ -11,7 +11,9 @@ function step(x, s, n)
 		
 		x_trj[1,i] = x < pi ? x1 : x1 - 2*pi 
 		x_trj[2,i] = x < pi ? y1 : y1 + pi
-
+		
+		x_trj[1,i] = x_trj[1,i] % (2*pi)
+		x_trj[2,i] = x_trj[2,i] % (2*pi)
 
 	end
 	return x_trj
