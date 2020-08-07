@@ -3,6 +3,17 @@ include("../examples/baker.jl")
 include("get_objective.jl")
 using PyPlot
 using JLD
+function plot_obj_erg_avg()
+	X = load("../data/obj_erg_avg/cos4y_s4.jld")
+	s4 = X["s4"]
+	J = X["J"]
+	fig, ax = subplots(1,1)
+	ax.plot(s4, J, ".", ms=4.0)
+	ax.grid(true)
+	ax.set_xlim([minimum(s4), maximum(s4)])
+	ax.xaxis.set_tick_params(labelsize=28)
+	ax.yaxis.set_tick_params(labelsize=28)
+end
 function plot_obj_fun()
 
 	n_xpts, n_ypts = 100, 100
