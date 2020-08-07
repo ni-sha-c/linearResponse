@@ -51,16 +51,18 @@ function compute_smooth_approx_density(s)
 				x_ind
 			ax = x_bins[x_ind]
 			ay = y_bins[y_ind]
-			rho_proc[locs,i] .+= smooth_indicator(
+			rho_proc[locs,i] .+= smooth_indicator.(
 				x,y,ax,ay,hx,hy)/n_step/n_spl/n_rep
-			ax = x_bins[(x_ind + 1) % n_xbins]
-			rho_proc[locs,i] .+= smooth_indicator(
+			x_ip1 = (x_ind .+ 1) .% n_xbins
+			ax = x_bins[x_ip1]
+			rho_proc[locs,i] .+= smooth_indicator.(
 				x,y,ax,ay,hx,hy)/n_step/n_spl/n_rep
-			ay = y_bins[(y_ind + 1) % n_ybins]
-			rho_proc[locs,i] .+= smooth_indicator(
+			y_ip1 = (y_ind .+ 1) .% n_ybins
+			ay = y_bins[y_ip1]
+			rho_proc[locs,i] .+= smooth_indicator.(
 				x,y,ax,ay,hx,hy)/n_step/n_spl/n_rep
 			ax = x_bins[x_ind]
-			rho_proc[locs,i] .+= smooth_indicator(
+			rho_proc[locs,i] .+= smooth_indicator.(
 				x,y,ax,ay,hx,hy)/n_step/n_spl/n_rep
 
 		end
@@ -111,6 +113,6 @@ function compute_indicator_density(s)
 end
 function get_dist()
 	s = zeros(4)
-	s[3] = 1.0
+	#s[3] = 1.0
 	compute_smooth_approx_density(s)
 end
