@@ -1,12 +1,14 @@
 include("../examples/baker.jl")
 using LinearAlgebra
 using JLD
+using SharedArrays
+using Distributed
 function stable_sens(s,nSteps)
 	vs = zeros(2)
 	q = rand(2)
 	q /= norm(q)
 	le = 0.
-	u = 2*pi*rand(d)
+	u = 2*pi*rand(2)
 	u_trj = step(u, s, nSteps-1)
 	du_trj = dstep(u_trj, s)
 	x = pert(u_trj, 4)
@@ -18,7 +20,8 @@ function stable_sens(s,nSteps)
 		le += log(nm_q)/nSteps
 		q ./= nm_q
 		vs .-= dot(vs,q)*q
-		x2 = u_trj[2,i]
+		x2 = (i==nSteps) ? step(u_trj[:,i],
+			s, 1)[2,end] : u_trj[2,i+1]
 		dJdu = [0., -4*sin(4*x2)]
 		dJds += dot(dJdu, vs)/nSteps
 	end
@@ -26,7 +29,6 @@ function stable_sens(s,nSteps)
 	return dJds
 end
 function get_stable_sens(s4)
-	d = 2
 	p = 4
 	nSteps = 100
 	s = zeros(p)
@@ -34,7 +36,7 @@ function get_stable_sens(s4)
 	n_exps = size(s4)[1]
 	dJds = zeros(n_exps)
 	n_rep = 160000
-	dJds_proc = SharedArray{Float64}(n_exps)
+	dJds_proc = SharedArray{Float64}(n_rep)
 	for k=1:n_exps
 		s[4] = s4[k]
 		dJds_proc .= 0.
@@ -45,6 +47,7 @@ function get_stable_sens(s4)
 		dJds[k] = sum(dJds_proc)
 		@show dJds[k]
 	end
-	return dJds
+	save("../data/stable_sens/dJds4.jld", "s4",
+	     s4, "dJds", dJds)
 end
 	
