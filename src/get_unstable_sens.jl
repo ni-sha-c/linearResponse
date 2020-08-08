@@ -4,24 +4,17 @@ using JLD
 using SharedArrays
 using Distributed
 function unstable_sens(s,nSteps)
-	q = rand(2)
-	q /= norm(q)
-	le = 0.
 	u = 2*pi*rand(2)
-	u_trj = step(u, s, nSteps-1)
-	du_trj = dstep(u_trj, s)
+	u_trj = step(u, s, nSteps).T
+	x, y = view(u_trj,:,1]), view(u_trj,:,2)
 	Xu = pert(u_trj, 4)
 	dJds = 0.
 	N = 10
-	g = zeros(nSteps+1)
-	J = zeros(nSteps+1)
-	dXudx1 = zeros(nSteps+1)
-	dXudx1[1:nSteps] = cos.(u_trj[1:,])
-	dXudx1[end] = cos(step(u_trj[:,end],s,1)[1,end])
+	g = zeros(nSteps)
+	J = cos.(4*x)[2:end]
+	dXudx1 = cos.(x)/2
 	for i = 1:nSteps
-		x1, x2 = (i==nSteps) ? step(u_trj[:,i],
-			s, 1)[:,end] : u_trj[:,i+1]
-		J[i+1] = cos(4*x2)
+		x1, x2 = x[i+1], y[i+1]
 		z = 2.0 + s[1]*cos(x1)
 		dzdx = -s[1]*sin(x1)
 		g[i+1] = g[i]*z + dzdx 
@@ -33,8 +26,8 @@ function unstable_sens(s,nSteps)
 		g_shift = g[2:nJ+1]
 		dXudx1_shift = dXudx1[1:nJ]
 		Xu_shift = Xu[1:nJ]
-		dJds -= dot(J_shift,dXudx1_shift) 
-		dJds -= dot(J_shift,g_shift.*Xu_shift)
+		dJds -= dot(J_shift,dXudx1_shift)/nJ 
+		dJds -= dot(J_shift,g_shift.*Xu_shift)/nJ
 	end
 	#@show le, dJds
 	return dJds
@@ -58,7 +51,7 @@ function get_unstable_sens(s1)
 		dJds[k] = sum(dJds_proc)
 		@show dJds[k]
 	end
-	save("../data/stable_sens/dJds1.jld", "s1",
-	     s1, "dJds", dJds1)
+	save("../data/unstable_sens/dJds1.jld", "s1",
+	     s1, "dJds", dJds)
 end
 	
