@@ -1,22 +1,22 @@
 using PyPlot
 using JLD
 function plot_stable_sens()
-	X = load("../data/obj_erg_avg/cos4y_s4.jld")
-	s4_arr = X["s4"]
+	X = load("../data/obj_erg_avg/cos4y_s1.jld")
+	s4_arr = X["s1"]
 	J_arr = X["J"]
 	fig, ax = subplots(1,1)
 	ax.plot(s4_arr, J_arr, "x", ms=4.0)
     ax.xaxis.set_tick_params(labelsize=28)
     ax.yaxis.set_tick_params(labelsize=28)
-    ax.set_xlabel(L"$s_4$",fontsize=28)
+    ax.set_xlabel(L"$s_1$",fontsize=28)
     ax.set_ylabel(L"$\langle J\rangle$",fontsize=28)
 	ax.grid(true)
 	
-	X = load("../data/stable_sens/dJds4.jld")
+	X = load("../data/unstable_sens/dJds1.jld")
 	dJds = X["dJds"]
-	s4 = X["s4"]
+	s4 = X["s1"]
 
-	X = load("../data/obj_erg_avg/cos4y_s4_sens.jld")
+	X = load("../data/obj_erg_avg/cos4y_s1_sens.jld")
 	J = X["J"]
 
 	eps = 3.e-2

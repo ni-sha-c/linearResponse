@@ -4,8 +4,8 @@ include("get_objective.jl")
 using PyPlot
 using JLD
 function plot_obj_erg_avg()
-	X = load("../data/obj_erg_avg/cos4y_s4.jld")
-	s4 = X["s4"]
+	X = load("../data/obj_erg_avg/cos4y_s1.jld")
+	s4 = X["s1"]
 	J = X["J"]
 	fig, ax = subplots(1,1)
 	ax.plot(s4, J, ".", ms=4.0)

@@ -5,21 +5,24 @@ using SharedArrays
 using Distributed
 function unstable_sens(s,nSteps)
 	u = 2*pi*rand(2)
-	u_trj = step(u, s, nSteps).T
-	x, y = view(u_trj,:,1]), view(u_trj,:,2)
-	Xu = pert(u_trj, 4)
+	u_trj = step(u, s, nSteps)'
+	x, y = view(u_trj,:,1), view(u_trj,:,2)
 	dJds = 0.
 	N = 10
+	nSteps = nSteps + 1
 	g = zeros(nSteps)
-	J = cos.(4*x)[2:end]
-	dXudx1 = cos.(x)/2
-	for i = 1:nSteps
-		x1, x2 = x[i+1], y[i+1]
+	J = cos.(4*y)
+	dXudx1 = zeros(2,nSteps)
+	Xu = [sin.(x) zeros(nSteps)]'
+	for i = 1:nSteps-1
+		x1, x2 = x[i], y[i]
 		z = 2.0 + s[1]*cos(x1)
 		dzdx = -s[1]*sin(x1)
-		g[i+1] = g[i]*z + dzdx 
+		dXudx1[:,i] = [cos(x1)/z, 0]   
+		g[i+1] = g[i]/z - dzdx/z*z 
 	end
-
+	Xu = Xu[1,:]
+	dXudx1 = dXudx1[1,:]
 	for n = 1:N
 		J_shift = J[n+1:end]
 		nJ = length(J_shift)
@@ -31,10 +34,11 @@ function unstable_sens(s,nSteps)
 	end
 	#@show le, dJds
 	return dJds
+	
 end
 function get_unstable_sens(s1)
 	p = 4
-	nSteps = 100
+	nSteps = 5000
 	s = zeros(p)
 	# J = cos(4y)
 	n_exps = size(s1)[1]
