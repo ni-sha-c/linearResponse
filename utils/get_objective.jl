@@ -24,6 +24,7 @@ function get_Javg_vs_s(ind)
 	for i = 1:n_pts
 		@show s_ind[i]
 		s[ind] = s_ind[i]
+		s[3] = s_ind[i]
 		J_proc .= 0.
 		t = @distributed for n=1:n_rep
 			J_proc[n] = obj_fun_erg_avg(s)/n_rep
@@ -31,7 +32,7 @@ function get_Javg_vs_s(ind)
 		wait(t)
 		J[i] = sum(J_proc) 
 	end
-	save("../data/obj_erg_avg/cos4y_s$(ind).jld",
+	save("../data/obj_erg_avg/cos4y_s$(ind)_s3.jld",
 		 "s$ind", s_ind,
 		"J", J)
 end
