@@ -4,7 +4,7 @@ include("get_objective.jl")
 using PyPlot
 using JLD
 function plot_obj_erg_avg(ind)
-	X = load("../data/obj_erg_avg/cos4y_s$ind.jld")
+	X = load("../data/obj_erg_avg/cos4y_s$(ind)_s3.jld")
 	s4 = X["s$ind"]
 	J = X["J"]
 	fig, ax = subplots(1,1)
@@ -13,7 +13,7 @@ function plot_obj_erg_avg(ind)
 	ax.set_xlim([minimum(s4), maximum(s4)])
 	ax.xaxis.set_tick_params(labelsize=28)
 	ax.yaxis.set_tick_params(labelsize=28)
-	ax.set_xlabel("\$ s_$(ind) \$", fontsize=28)
+	ax.set_xlabel("\$ s_$(ind), s_3 \$", fontsize=28)
 	ax.set_ylabel(L"\langle \cos(4 x_2)\rangle", fontsize=28)
 end
 function plot_obj_fun()

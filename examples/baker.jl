@@ -50,3 +50,18 @@ function pert(u, p)
 		return 0
 	end
 end
+function d2step(u, s)
+	n = size(u)[2]
+	ddu = zeros(2,4,n)
+	for i = 1:n
+		x, y = u[1,i], u[2,i]
+		sx, sy = sin(x), sin(2*y)/2
+		dsx, dsy = cos(x), cos(2*y)
+		dxdsx, dydsy = -sin(x), -2*sin(2*y)
+		ddu[:,1,i] = [s[1]*dxdsx + s[2]*sy*dxdsx, s[2]*dsy*dsx] 
+		ddu[:,2,i] = [s[3]*dxdsx*sy, s[3]*dsx*dsy]
+		ddu[:,3,i] = [s[2]*dsx*dsy, s[2]*sx*dydsy]
+		ddu[:,4,i] = [s[3]*dsx*dsy, s[4]*dydsy + s[3]*sx*dydsy]
+	end
+	return ddu
+end
