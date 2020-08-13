@@ -3,23 +3,35 @@ using LinearAlgebra
 using JLD
 using SharedArrays
 using Distributed
-function unstable_sens(s,nSteps)
+function sens(s,nSteps)
 	u = 2*pi*rand(2)
 	u_trj = step(u, s, nSteps)'
 	x, y = view(u_trj,:,1), view(u_trj,:,2)
-	dJds = 0.
-	N = 10
+	du_trj = dstep(u_trj, s)
+	vs = zeros(2)
+	q = rand(2)
+	q /= norm(q)
+
+	dJds_st = 0.
+	dJds_ust = 0.
+	N = 4
 	nSteps = nSteps + 1
 	g = zeros(nSteps)
 	J = cos.(4*y)
 	dXudx1 = zeros(2,nSteps)
 	Xu = [sin.(x) zeros(nSteps)]'
 	for i = 1:nSteps-1
+		vs .= du_trj[:,:,i]*vs + pp[:,i]
+
+		q .= du_trj[:,:,i]*q 
+		vs .-= dot(vs,q)*q
 		x1, x2 = x[i], y[i]
 		z = 2.0 + s[1]*cos(x1)
 		dzdx = -s[1]*sin(x1)
 		dXudx1[:,i] = [cos(x1)/z, 0]   
 		g[i+1] = g[i]/z - dzdx/z*z 
+		dJdu = [0., -4*sin(4*x2)]
+		dJds_st += dot(dJdu, vs)/nSteps
 	end
 	Xu = Xu[1,:]
 	dXudx1 = dXudx1[1,:]
@@ -36,6 +48,7 @@ function unstable_sens(s,nSteps)
 	return dJds
 	
 end
+
 function get_sens(s)
 	nSteps = 5000
 	s = zeros(p)
