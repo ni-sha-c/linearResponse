@@ -1,6 +1,6 @@
 using PyPlot
 using JLD
-function plot_unstable_sens()
+function plot_sens()
 	X = load("../data/obj_erg_avg/cos4y_s1_s3.jld")
 	s1_arr = X["s1"]
 	J_arr = X["J"]
@@ -8,15 +8,16 @@ function plot_unstable_sens()
 	ax.plot(s1_arr, J_arr, "x", ms=4.0)
     ax.xaxis.set_tick_params(labelsize=28)
     ax.yaxis.set_tick_params(labelsize=28)
-    ax.set_xlabel(L"$s_1$",fontsize=28)
+    ax.set_xlabel(L"$s_1, s_3$",fontsize=28)
     ax.set_ylabel(L"$\langle J\rangle$",fontsize=28)
 	ax.grid(true)
-	
-	X = load("../data/unstable_sens/dJds.jld")
+
+	#=
+	X = load("../data/sens/dJds_test.jld")
 	dJds = X["dJds"]
 	s1 = X["s1"]
 
-	X = load("../data/obj_erg_avg/cos4y_s1_s3.jld")
+	X = load("../data/obj_erg_avg/cos4y_s1_s3_sens.jld")
 	J = X["J"]
 
 	eps = 1.e-2
@@ -29,6 +30,7 @@ function plot_unstable_sens()
 	ax.plot(s_pts, J_pts, "g",lw=2.0)
 
 	return dJds
+	=#
 
 end
 	

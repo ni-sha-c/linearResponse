@@ -94,7 +94,7 @@ function get_sens(s)
 		dJds[k] = sum(dJds_proc)
 		@show dJds[k]
 	end
-	save("../data/unstable_sens/dJds.jld", "s1",
+	save("../data/sens/dJds.jld", "s1",
 	     s1, "dJds", dJds)
 end
 	
