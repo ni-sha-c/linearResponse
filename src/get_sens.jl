@@ -22,9 +22,17 @@ function sens(s,nSteps)
 	g = zeros(nSteps)
 	J = cos.(4*y)
 	
+	# Df represents the derivative of f 
+	# on the 
+	# unstable manifold.
+	# Xu = a q
 	Xu = zeros(2, nSteps)
-	dXuq = zeros(nSteps)
-	vv = zeros(2)
+	a = zeros(nSteps)
+	Da = zeros(nSteps)
+	Dq = zeros(2)
+	Dvs = zeros(2)
+	
+
 	for i = 1:nSteps-1
 		dui = du_trj[:,:,i]
 		ppi = pp[:,i]
@@ -35,15 +43,21 @@ function sens(s,nSteps)
 		z = norm(q)
 		z2 = z*z
 		q ./= z
-		Xu[:, i] = dot(ppi,q)*q
+		a[i] = dot(vs, q)
+		Xu[:, i] = a[i]*q 
 		vs .-= dot(vs,q)*q
 		d2q = reshape([dot(ddu_trj[:,j,i],
 					q) for j=1:4],2,2)
-		dz = d2q*q/z2 + dui*vv/z2
+		dz = d2q*q/z2 + dui*Dq/z2
 		dzdx = dot(dz, q)
-		vv .= dz - dzdx*q 
-		dXuq[i] = dot(dppi*q, q)  
-
+		Dq .= dz - dzdx*q
+		Dvs .= d2q*vs/z + dui*vs/z + 
+				dppi*q - Da[i]*q - a[i]*Dq
+		Delta_Da = dot(Dvs, q) - dot(vs, Dq) 
+		Dvs .+= Delta_Da*q
+		Da[i] = dot(q, Dq) + dot(d2q*vs, q)/z + 
+				dot(dui*vs/z, q) + dot(dppi*q, q) + 
+				Delta_Da
 		g[i+1] = g[i]/z - dzdx/z*z 
 		dJdu = [0., -4*sin(4*yi)]
 		dJds_st += dot(dJdu, vs)/nSteps
@@ -54,14 +68,13 @@ function sens(s,nSteps)
 		J_shift = J[n+1:end]
 		nJ = length(J_shift)
 		g_shift = g[2:nJ+1]
-		dXudx1_shift = dXuq[1:nJ]
+		Da_shift = Da[1:nJ]
 		Xu_shift = Xu[1:nJ]
-		dJds_ust -= dot(J_shift,dXudx1_shift)/nJ 
+		dJds_ust -= dot(J_shift,Da_shift)/nJ 
 		dJds_ust -= dot(J_shift,g_shift.*Xu_shift)/nJ
 	end
 	#@show le, dJds
 	return dJds_st + dJds_ust
-	
 end
 
 function get_sens(s)
@@ -75,7 +88,7 @@ function get_sens(s)
 		sk = s[:,k]
 		dJds_proc .= 0.
 		t = @distributed for j=1:n_rep
-			dJds_proc[j] = unstable_sens(sk,nSteps)/n_rep
+			dJds_proc[j] = sens(sk,nSteps)/n_rep
 		end
 		wait(t)
 		dJds[k] = sum(dJds_proc)
