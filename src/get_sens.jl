@@ -13,10 +13,13 @@ function sens(s,nSteps)
 	q = rand(2)
 	q /= norm(q)
 
-	pp = pert(u_trj, 1) #.+ pert(u_trj,3)
+	pp = pert(u_trj, 1) .+ pert(u_trj,3)
+	q1 = rand(2)
+	vs1 = zeros(2)
+	
 	dJds_st = 0.
 	dJds_ust = 0.
-	N = 4
+	N = 11
 	nSteps = nSteps + 1
 	g = zeros(nSteps)
 	J = cos.(4*y)
@@ -31,6 +34,7 @@ function sens(s,nSteps)
 	Da = zeros(nSteps)
 	Dq = zeros(2)
 	Dvs = zeros(2)
+	Dvs1 = zeros(2)
 	
 	# nSteps large number.
 	for i = 1:nSteps-1
@@ -38,51 +42,57 @@ function sens(s,nSteps)
 		ppi = pp[:,i]
 		xi, yi = x[i], y[i]
 		dppi = [cos(xi) 0; cos(xi)*sin(yi) sin(xi)*cos(yi)]
-		vs .= dui*vs + ppi
-		q .= dui*q
-		z = norm(q)
+		q1 .= dui*q
+		z = norm(q1)
+		q1 ./= z
+
 		z2 = z*z
-		q ./= z
-		a[i] = dot(vs, q)
-		Xu[:, i] = a[i]*q 
-		vs .-= dot(vs,q)*q
+		
+		vs1 .= dui*vs + ppi
+		a[i+1] = dot(vs1, q1)
+		vs1 .-= a[i+1]*q1
+
+		
 		d2q = reshape([dot(ddu_trj[:,j,i],
 					q) for j=1:4],2,2)
 		dz = d2q*q/z2 + dui*Dq/z2
 		dzdx = dot(dz, q)
 		Dq .= dz - dzdx*q
-		Dvs .= d2q*vs/z + dui*vs/z + 
-				dppi*q - Da[i]*q - a[i]*Dq
-		Delta_Da = dot(Dvs, q) - dot(vs, Dq) 
-		Dvs .+= Delta_Da*q
-		Da[i] = dot(q, Dq) + dot(d2q*vs, q)/z + 
-				dot(dui*vs/z, q) + dot(dppi*q, q) + 
-				Delta_Da
+		
+		Dvs1 .= d2q*vs/z + dui*Dvs/z + dppi*q1
+		Da[i+1] = dot(vs1, Dq) + dot(Dvs1, q1)
+		Dvs1 .= Dvs1 - Da[i+1]*q1 - a[i+1]*Dq
+		Delta_Da = dot(Dvs1, q1) + dot(vs1, Dq) 
+		Dvs .-= Delta_Da*q
+		Da[i+1] += Delta_Da
 		g[i+1] = g[i]/z - dzdx/z*z 
 		dJdu = [0., -4*sin(4*yi)]
 		dJds_st += dot(dJdu, vs)/nSteps
+
+		vs .= vs1
+		q .= q1
+		Dvs .= Dvs1
+
+
 	end
-	Xu = Xu[1,:]
-	#dXuq = dXuq[1,:]
 	for n = 1:N
 		J_shift = J[n+1:end]
 		nJ = length(J_shift)
 		g_shift = g[2:nJ+1]
 		Da_shift = Da[1:nJ]
-		Xu_shift = Xu[1:nJ]
+		a_shift = a[1:nJ]
 		dJds_ust -= dot(J_shift,Da_shift)/nJ 
-		dJds_ust -= dot(J_shift,g_shift.*Xu_shift)/nJ
+		dJds_ust -= dot(J_shift,g_shift.*a_shift)/nJ
 	end
 	#@show le, dJds
 	return dJds_st + dJds_ust
 end
-
 function get_sens(s)
-	nSteps = 5000
+	nSteps = 100000
 	# J = cos(4y)
-	n_exps = size(s1)[1]
+	n_exps = size(s)[2]
 	dJds = zeros(n_exps)
-	n_rep = 1600
+	n_rep = 16
 	dJds_proc = SharedArray{Float64}(n_rep)
 	for k=1:n_exps
 		sk = s[:,k]
@@ -94,7 +104,7 @@ function get_sens(s)
 		dJds[k] = sum(dJds_proc)
 		@show dJds[k]
 	end
-	save("../data/unstable_sens/dJds.jld", "s1",
-	     s1, "dJds", dJds)
+	save("../data/sens/dJds.jld", "s1",
+	     s[1,:], "dJds", dJds)
 end
 	
