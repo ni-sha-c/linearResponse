@@ -13,8 +13,7 @@ function sens(s,nSteps)
 	q = rand(2)
 	q /= norm(q)
 
-	pp = pert(u_trj, 1) .+ pert(u_trj,3)
-	@show size(pp)
+	pp = pert(u_trj, 1) #.+ pert(u_trj,3)
 	dJds_st = 0.
 	dJds_ust = 0.
 	N = 4
@@ -26,15 +25,16 @@ function sens(s,nSteps)
 	# on the 
 	# unstable manifold.
 	# Xu = a q
+	# d = 2
 	Xu = zeros(2, nSteps)
 	a = zeros(nSteps)
 	Da = zeros(nSteps)
 	Dq = zeros(2)
 	Dvs = zeros(2)
 	
-
+	# nSteps large number.
 	for i = 1:nSteps-1
-		dui = du_trj[:,:,i]
+		dui = du_trj[:,:,i] # for large systems, can't store Jacobian.
 		ppi = pp[:,i]
 		xi, yi = x[i], y[i]
 		dppi = [cos(xi) 0; cos(xi)*sin(yi) sin(xi)*cos(yi)]
