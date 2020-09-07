@@ -1,16 +1,36 @@
 include("../examples/baker.jl")
-using PyPlot
+using LinearAlgebra
+using Plots
 function compute_w()
 	s = [0.,0.,0.,0.]
-	n = 1000
-	u = zeros(2, n)
-	q = zeros(2, n)
-
-
+	n = 100
+	m = 10
+	x = LinRange(0.,1.,n)
+	u = [[x[i],x[j]] for i=1:n,j = 1:n][:]
+	q = [rand(2) for i=1:n, j=1:n][:]
+	n = length(u)
+	pts = zeros(2, n)
+	vecs = zeros(2, n)
+	eps = 5.e-2
+	@gif for i = 1:m
+		@show i
+		pts .= hcat(u...)
+		vecs .= hcat(q...)
+		x_pts = [pts[1,:] - eps*vecs[1,:] pts[1,:] + eps*vecs[1,:]]' 
+		y_pts =	[pts[2,:] - eps*vecs[2,:] pts[2,:] + eps*vecs[2,:]]' 
+		plot(x_pts, y_pts, linecolor=:black, label=:false,
+			 axis=(font(25,"sans-serif")))
+	end every 5
 
 
 end
-
+function pushforward(u, q, s)
+	du = dstep(u, s)
+	q = du*q
+	z = norm(q)
+	q ./= z
+	return q, z
+end
 function plot_one_step()
 	n_xq, n_yq = 20, 40
 	eps = 1.e-14
