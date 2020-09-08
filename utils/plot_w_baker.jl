@@ -1,9 +1,10 @@
 include("../examples/baker.jl")
 using LinearAlgebra
 using PyPlot
+using PyCall
 function compute_w()
 	s = [0.3, 0., 0.3, 0.0]
-	n = 120
+	n = 40
 	m = 40
 	x = LinRange(0.,2*pi,n)
 	u = [[x[i] + 2*pi*rand(),x[j] + 2*pi*rand()] 
@@ -20,20 +21,21 @@ function compute_w()
 	for i = 1:m
 		@show i
 		u .= next.(u, Ref(s))
-		for (k, uk) in enumerate(u)
-			q[k], z[k] = pushforward(uk, q[k], s)
-		end
+		q .= pushforward.(u, q, Ref(s))
+		z .= norm.(q)
+		q .= q./z
 	end
 	for i = 1:m
 		@show i
 		D2 .= pushforward_second_order.(u, q, Ref(s))	
-		for (k, uk) in enumerate(u)
-			w[k], z[k] = pushforward(uk, w[k], s)
-			w[k] ./= z[k]
-			q[k], z[k] = pushforward(uk, q[k], s)
-		end
-		w .+= tensordot(D2, q)./(z.*z)	
+		w .= pushforward.(u, w, Ref(s))
+		w .+= tensordot(D2, q)
+		q .= pushforward.(u, q, Ref(s))
+		z .= norm.(q)
+		q .= q./z
+		w ./= (z.*z)
 		w .= w .- dot.(w, q).*q
+		u .= next.(u, Ref(s))
 		if rem(i, 10) == 1
 			pts .= hcat(u...)
 			vecs .= hcat(w...)
@@ -51,7 +53,6 @@ function compute_w()
 
 			ax.plot(x_pts, y_pts, "r")
 			savefig(string("plots/w_n_",i,".png"))
-			#plt.pause(0.01)
 		end
 	end 
 	return pts, vecs
