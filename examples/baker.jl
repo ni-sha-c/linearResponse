@@ -61,7 +61,7 @@ function dstep(u::Array{Float64,2},s::Array{Float64,1})
 				s[3]*sx.*dsy
 	return du
 end
-function pert(u, p)
+function pert(u::Array{Float64,2}, p::Int64)
 	n = size(u)[2]
 	x, y = view(u,1,:), view(u,2,:)
 	sx, sy = sin.(x), sin.(2*y)./2
@@ -73,6 +73,23 @@ function pert(u, p)
 		return reshape([zeros(n) sy.*sx],n,2)' 
 	elseif p==4
 		return reshape([zeros(n) sy],n,2)'
+	else
+		println("parameter perturbation is only defined 
+				for indices 1 through 4")
+		return 0
+	end
+end
+function pert(u::Array{Float64,1}, p::Int64)
+	x, y = u[1], u[2]
+	sx, sy = sin(x), sin(2*y)/2
+	if p==1
+		return [sx, 0]
+	elseif p==2
+		return [sy.*sx, 0]
+	elseif p==3
+		return [0, sy.*sx] 
+	elseif p==4
+		return [0, sy]
 	else
 		println("parameter perturbation is only defined 
 				for indices 1 through 4")

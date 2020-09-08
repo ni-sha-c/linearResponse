@@ -5,10 +5,9 @@ using PyCall
 @pyimport matplotlib.collections as coll 
 @pyimport matplotlib.colors as cs 
 @pyimport matplotlib.cm as cm 
-function plot_w()
+function plot_w(m)
 	s = [0.3, 0., 0.3, 0.0]
 	n = 120
-	m = 40
 	x = LinRange(0.,2*pi,n)
 	u = [[x[i] + 2*pi*rand(),x[j] + 2*pi*rand()] 
 		 for i=1:n,j = 1:n][:]
@@ -24,15 +23,14 @@ function plot_w()
 	eps = 1.e-1
 	filepath = string("/home/nishac/Research/PhDThesis/papers/",
 					  "Decomposition-of-Linear-Response/figs/")
-	for i = 1:m
+	for i = 1:20
 		@show i
 		u .= next.(u, Ref(s))
 		q .= pushforward.(u, q, Ref(s))
 		z .= norm.(q)
 		q .= q./z
 	end
-	fig = figure(figsize=(15,15))
-	ax = fig.add_subplot(111)
+
 
 	for i = 1:m
 		@show i
@@ -45,48 +43,114 @@ function plot_w()
 		w ./= (z.*z)
 		w .= w .- dot.(w, q).*q
 		u .= next.(u, Ref(s))
-		if rem(i, 10) == 1
-			nw = norm.(w)
-			segments .= create_line_colls(u, q, eps)
-			lc = coll.LineCollection(segments, 
-									 cmap=plt.get_cmap("cool"),
-									 norm=cs.Normalize(minimum(nw),
-													   maximum(nw)))
-			lc.set_array(nw)
-			lc.set_linewidth(2)
-
-					
-			ax = fig.add_subplot(111)
-			ax.set_xlim([0,2*pi])
-			ax.set_ylim([0,2*pi])
-			ax.set_xlabel(L"$x_1$", fontsize=30)
-			ax.set_ylabel(L"$x_2$", fontsize=30)
-			ax.xaxis.set_tick_params(labelsize=30)
-			ax.yaxis.set_tick_params(labelsize=30)
-			ax.axis("scaled")
-
-			ax.add_collection(lc)
-			
-
-			cbar = fig.colorbar(cm.ScalarMappable(
-								norm=cs.Normalize(minimum(nw),
-                                maximum(nw)), 
-							   cmap=plt.get_cmap("cool")), ax=ax,
-								orientation="horizontal",shrink=0.4,
-								pad=0.2)
-
-			cbar.ax.tick_params(labelsize=30)
-			cbar.ax.xaxis.get_offset_text().set_fontsize(30)
-			plt.tight_layout()
-	
-			savefig(string(filepath,"w_n_",i,".png"))
-		
-			cbar.remove()
-		end
 	end 
-	return pts, vecs
+	nw = norm.(w)
+	segments .= create_line_colls(u, q, eps)
+	lc = coll.LineCollection(segments, 
+						cmap=plt.get_cmap("cool"),
+						norm=cs.Normalize(minimum(nw),
+						maximum(nw)))
+	lc.set_array(nw)
+	lc.set_linewidth(2)
+	
+	fig, ax = subplots(1,1)
+	ax.set_xlim([0,2*pi])
+	ax.set_ylim([0,2*pi])
+	ax.set_xlabel(L"$x_1$", fontsize=30)
+	ax.set_ylabel(L"$x_2$", fontsize=30)
+	ax.xaxis.set_tick_params(labelsize=30)
+	ax.yaxis.set_tick_params(labelsize=30)
 
+	ax.add_collection(lc)
+	ax.axis("scaled")
+
+	cbar = fig.colorbar(cm.ScalarMappable(
+						norm=cs.Normalize(minimum(nw),
+						maximum(nw)), 
+					   cmap=plt.get_cmap("cool")), ax=ax,
+						orientation="horizontal",shrink=0.4,
+						pad=0.1)
+
+	cbar.ax.tick_params(labelsize=30)
+	cbar.ax.xaxis.get_offset_text().set_fontsize(30)
+	plt.tight_layout()
+	#savefig(string(filepath,"w_n_",m,".png"))
+	return segments, nw
 end
+function plot_v(m)
+	s = [0.3, 0., 0.3, 0.0]
+	n = 120
+	x = LinRange(0.,2*pi,n)
+	u = [[x[i] + 2*pi*rand(),x[j] + 2*pi*rand()] 
+		 for i=1:n,j = 1:n][:]
+	q = [rand(2) for i=1:n, j=1:n][:]
+	w = [zeros(2) for i=1:n, j=1:n][:]
+	D2 = [zeros(2,2) for i=1:n, j=1:n][:]
+	n = length(u)
+	z = zeros(n)
+	nw = zeros(n)
+	pts = zeros(2, n)
+	vecs = zeros(2, n)
+	segments = zeros(n, 2, 2)
+	eps = 1.e-1
+	filepath = string("/home/nishac/Research/PhDThesis/papers/",
+					  "Decomposition-of-Linear-Response/figs/")
+	for i = 1:20
+		@show i
+		u .= next.(u, Ref(s))
+		q .= pushforward.(u, q, Ref(s))
+		z .= norm.(q)
+		q .= q./z
+	end
+
+
+	for i = 1:m
+		@show i
+		D2 .= pushforward_second_order.(u, q, Ref(s))	
+		w .= pushforward.(u, w, Ref(s))
+		w .+= tensordot(D2, q)
+		q .= pushforward.(u, q, Ref(s))
+		z .= norm.(q)
+		q .= q./z
+		w ./= (z.*z)
+		w .= w .- dot.(w, q).*q
+		u .= next.(u, Ref(s))
+	end 
+	nw = norm.(w)
+	segments .= create_line_colls(u, q, eps)
+	lc = coll.LineCollection(segments, 
+						cmap=plt.get_cmap("cool"),
+						norm=cs.Normalize(minimum(nw),
+						maximum(nw)))
+	lc.set_array(nw)
+	lc.set_linewidth(2)
+	
+	fig, ax = subplots(1,1)
+	ax.set_xlim([0,2*pi])
+	ax.set_ylim([0,2*pi])
+	ax.set_xlabel(L"$x_1$", fontsize=30)
+	ax.set_ylabel(L"$x_2$", fontsize=30)
+	ax.xaxis.set_tick_params(labelsize=30)
+	ax.yaxis.set_tick_params(labelsize=30)
+
+	ax.add_collection(lc)
+	ax.axis("scaled")
+
+	cbar = fig.colorbar(cm.ScalarMappable(
+						norm=cs.Normalize(minimum(nw),
+						maximum(nw)), 
+					   cmap=plt.get_cmap("cool")), ax=ax,
+						orientation="horizontal",shrink=0.4,
+						pad=0.1)
+
+	cbar.ax.tick_params(labelsize=30)
+	cbar.ax.xaxis.get_offset_text().set_fontsize(30)
+	plt.tight_layout()
+	#savefig(string(filepath,"w_n_",m,".png"))
+	return segments, nw
+end
+
+
 function tensordot(A, b)
 	return [Ai*b[i] for (i, Ai) in enumerate(A)]
 end
