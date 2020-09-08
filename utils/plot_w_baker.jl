@@ -75,6 +75,75 @@ function plot_w(m)
 	#savefig(string(filepath,"w_n_",m,".png"))
 	return segments, nw
 end
+function plot_y(m)
+	s = [0.3, 0., 0.3, 0.0]
+	n = 400
+	x = LinRange(0.,2*pi,n)
+	u = [[x[i] + 2*pi*rand(),x[j] + 2*pi*rand()] 
+		 for i=1:n,j = 1:n][:]
+	q = [rand(2) for i=1:n, j=1:n][:]
+	v = [zeros(2) for i=1:n, j=1:n][:]
+	X = [zeros(2) for i=1:n, j=1:n][:]
+	n = length(u)
+	z = zeros(n)
+	a = zeros(n)
+	segments = zeros(n, 2, 2)
+	eps = 1.e-1
+	filepath = string("/home/nishac/Research/PhDThesis/papers/",
+					  "Decomposition-of-Linear-Response/figs/")
+	for i = 1:20
+		@show i
+		u .= next.(u, Ref(s))
+		q .= pushforward.(u, q, Ref(s))
+		z .= norm.(q)
+		q .= q./z
+	end
+	for i = 1:m
+		@show i
+		X .= pert.(u, 1) .+ pert.(u, 3) 
+		v .= pushforward.(u, v, Ref(s))
+		v .+= X
+		q .= pushforward.(u, q, Ref(s))
+		z .= norm.(q)
+		q .= q./z
+		a .= dot.(v, q)
+		v .-= a.*q
+		u .= next.(u, Ref(s))
+	end
+	#a .= norm.(v)
+	segments .= create_line_colls(u, q, eps)
+	lc = coll.LineCollection(segments, 
+						cmap=plt.get_cmap("coolwarm"),
+						norm=cs.Normalize(minimum(a),
+						maximum(a)))
+	lc.set_array(a)
+	lc.set_linewidth(2)
+	
+	fig, ax = subplots(1,1)
+	ax.set_xlim([0,2*pi])
+	ax.set_ylim([0,2*pi])
+	ax.set_xlabel(L"$x_1$", fontsize=30)
+	ax.set_ylabel(L"$x_2$", fontsize=30)
+	ax.xaxis.set_tick_params(labelsize=30)
+	ax.yaxis.set_tick_params(labelsize=30)
+
+	ax.add_collection(lc)
+	ax.axis("scaled")
+
+	cbar = fig.colorbar(cm.ScalarMappable(
+						norm=cs.Normalize(minimum(a),
+						maximum(a)), 
+					   cmap=plt.get_cmap("coolwarm")), ax=ax,
+						orientation="horizontal",shrink=0.4,
+						pad=0.1)
+
+	cbar.ax.tick_params(labelsize=30)
+	cbar.ax.xaxis.get_offset_text().set_fontsize(30)
+	plt.tight_layout()
+	#savefig(string(filepath,"w_n_",m,".png"))
+	return segments, a
+end
+
 function plot_v(m)
 	s = [0.3, 0., 0.3, 0.0]
 	n = 400
@@ -110,7 +179,7 @@ function plot_v(m)
 		v .-= a.*q
 		u .= next.(u, Ref(s))
 	end
-	a .= norm.(v)
+	#a .= norm.(v)
 	segments .= create_line_colls(u, q, eps)
 	lc = coll.LineCollection(segments, 
 						cmap=plt.get_cmap("coolwarm"),
