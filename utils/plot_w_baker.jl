@@ -7,7 +7,7 @@ using PyCall
 @pyimport matplotlib.cm as cm 
 function plot_w(m)
 	s = [0.3, 0., 0.3, 0.0]
-	n = 120
+	n = 400
 	x = LinRange(0.,2*pi,n)
 	u = [[x[i] + 2*pi*rand(),x[j] + 2*pi*rand()] 
 		 for i=1:n,j = 1:n][:]
@@ -17,8 +17,6 @@ function plot_w(m)
 	n = length(u)
 	z = zeros(n)
 	nw = zeros(n)
-	pts = zeros(2, n)
-	vecs = zeros(2, n)
 	segments = zeros(n, 2, 2)
 	eps = 1.e-1
 	filepath = string("/home/nishac/Research/PhDThesis/papers/",
@@ -79,18 +77,16 @@ function plot_w(m)
 end
 function plot_v(m)
 	s = [0.3, 0., 0.3, 0.0]
-	n = 120
+	n = 400
 	x = LinRange(0.,2*pi,n)
 	u = [[x[i] + 2*pi*rand(),x[j] + 2*pi*rand()] 
 		 for i=1:n,j = 1:n][:]
 	q = [rand(2) for i=1:n, j=1:n][:]
-	w = [zeros(2) for i=1:n, j=1:n][:]
-	D2 = [zeros(2,2) for i=1:n, j=1:n][:]
+	v = [zeros(2) for i=1:n, j=1:n][:]
+	X = [zeros(2) for i=1:n, j=1:n][:]
 	n = length(u)
 	z = zeros(n)
-	nw = zeros(n)
-	pts = zeros(2, n)
-	vecs = zeros(2, n)
+	a = zeros(n)
 	segments = zeros(n, 2, 2)
 	eps = 1.e-1
 	filepath = string("/home/nishac/Research/PhDThesis/papers/",
@@ -102,27 +98,24 @@ function plot_v(m)
 		z .= norm.(q)
 		q .= q./z
 	end
-
-
 	for i = 1:m
 		@show i
-		D2 .= pushforward_second_order.(u, q, Ref(s))	
-		w .= pushforward.(u, w, Ref(s))
-		w .+= tensordot(D2, q)
+		X .= pert.(u, 1) .+ pert.(u, 3) 
+		v .= pushforward.(u, v, Ref(s))
+		v .+= X
 		q .= pushforward.(u, q, Ref(s))
 		z .= norm.(q)
 		q .= q./z
-		w ./= (z.*z)
-		w .= w .- dot.(w, q).*q
+		a .= dot.(v, q)
+		v .-= a.*q
 		u .= next.(u, Ref(s))
 	end 
-	nw = norm.(w)
 	segments .= create_line_colls(u, q, eps)
 	lc = coll.LineCollection(segments, 
-						cmap=plt.get_cmap("cool"),
-						norm=cs.Normalize(minimum(nw),
-						maximum(nw)))
-	lc.set_array(nw)
+						cmap=plt.get_cmap("coolwarm"),
+						norm=cs.Normalize(minimum(a),
+						maximum(a)))
+	lc.set_array(a)
 	lc.set_linewidth(2)
 	
 	fig, ax = subplots(1,1)
@@ -137,9 +130,9 @@ function plot_v(m)
 	ax.axis("scaled")
 
 	cbar = fig.colorbar(cm.ScalarMappable(
-						norm=cs.Normalize(minimum(nw),
-						maximum(nw)), 
-					   cmap=plt.get_cmap("cool")), ax=ax,
+						norm=cs.Normalize(minimum(a),
+						maximum(a)), 
+					   cmap=plt.get_cmap("coolwarm")), ax=ax,
 						orientation="horizontal",shrink=0.4,
 						pad=0.1)
 
@@ -147,10 +140,8 @@ function plot_v(m)
 	cbar.ax.xaxis.get_offset_text().set_fontsize(30)
 	plt.tight_layout()
 	#savefig(string(filepath,"w_n_",m,".png"))
-	return segments, nw
+	return segments, a
 end
-
-
 function tensordot(A, b)
 	return [Ai*b[i] for (i, Ai) in enumerate(A)]
 end
