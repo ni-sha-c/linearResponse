@@ -2,9 +2,12 @@ include("../examples/baker.jl")
 using LinearAlgebra
 using PyPlot
 using PyCall
+@pyimport matplotlib.collections as coll 
+@pyimport matplotlib.colors as cs 
+@pyimport matplotlib.cm as cm 
 function compute_w()
 	s = [0.3, 0., 0.3, 0.0]
-	n = 40
+	n = 120
 	m = 40
 	x = LinRange(0.,2*pi,n)
 	u = [[x[i] + 2*pi*rand(),x[j] + 2*pi*rand()] 
@@ -14,8 +17,10 @@ function compute_w()
 	D2 = [zeros(2,2) for i=1:n, j=1:n][:]
 	n = length(u)
 	z = zeros(n)
+	nw = zeros(n)
 	pts = zeros(2, n)
 	vecs = zeros(2, n)
+	segments = zeros(n, 2, 2)
 	eps = 1.e-1
 	fig, ax = subplots(1,1)
 	for i = 1:m
@@ -37,11 +42,15 @@ function compute_w()
 		w .= w .- dot.(w, q).*q
 		u .= next.(u, Ref(s))
 		if rem(i, 10) == 1
-			pts .= hcat(u...)
-			vecs .= hcat(w...)
-			x_pts = [pts[1,:] - eps*vecs[1,:] pts[1,:] + eps*vecs[1,:]]'
+			nw = norm.(w)
+			segments .= create_line_colls(u, q, eps)
+			lc = coll.LineCollection(segments, 
+									 cmap=plt.get_cmap("cool"),
+									 norm=cs.Normalize(minimum(nw),
+													   maximum(nw)))
+			lc.set_array(nw)
+			lc.set_linewidth(2)
 
-			y_pts =	[pts[2,:] - eps*vecs[2,:] pts[2,:] + eps*vecs[2,:]]' 
 			ax.clear()
 			ax.set_xlim([0,2*pi])
 			ax.set_ylim([0,2*pi])
@@ -51,8 +60,21 @@ function compute_w()
 			ax.yaxis.set_tick_params(labelsize=30)
 			ax.axis("scaled")
 
-			ax.plot(x_pts, y_pts, "r")
+			ax.add_collection(lc)
+			
+
+			cbar = fig.colorbar(cm.ScalarMappable(
+								norm=cs.Normalize(minimum(nw),
+                                maximum(nw)), 
+							   cmap=plt.get_cmap("cool")), ax=ax,
+								orientation="horizontal",shrink=0.4,
+								pad=0.06)
+
+			cbar.ax.tick_params(labelsize=30)
+			cbar.ax.xaxis.get_offset_text().set_fontsize(30)
+			pause(0.1)
 			savefig(string("plots/w_n_",i,".png"))
+			cbar.remove()
 		end
 	end 
 	return pts, vecs
@@ -66,7 +88,15 @@ function pushforward_second_order(u, v1, s)
 	d2u_v1 = reshape([dot(d2u[:,i], v1) for i=1:4], 2, 2)
 	return d2u_v1
 end
-
+function create_line_colls(u, q, eps)
+	n = length(u)
+	lc = zeros(n, 2, 2)
+	for i = 1:n
+		lc[i,1,:] = u[i] .- eps*q[i]	
+		lc[i,2,:] = u[i] .+ eps*q[i]	
+	end
+	return lc
+end
 function pushforward(u, q, s)
 	du = dstep(u, s)
 	q = du*q
