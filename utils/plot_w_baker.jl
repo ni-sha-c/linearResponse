@@ -5,7 +5,7 @@ using PyCall
 @pyimport matplotlib.collections as coll 
 @pyimport matplotlib.colors as cs 
 @pyimport matplotlib.cm as cm 
-function compute_w()
+function plot_w()
 	s = [0.3, 0., 0.3, 0.0]
 	n = 120
 	m = 40
@@ -22,7 +22,8 @@ function compute_w()
 	vecs = zeros(2, n)
 	segments = zeros(n, 2, 2)
 	eps = 1.e-1
-	fig, ax = subplots(1,1)
+	filepath = string("/home/nishac/Research/PhDThesis/papers/",
+					  "Decomposition-of-Linear-Response/figs/")
 	for i = 1:m
 		@show i
 		u .= next.(u, Ref(s))
@@ -30,6 +31,9 @@ function compute_w()
 		z .= norm.(q)
 		q .= q./z
 	end
+	fig = figure(figsize=(15,15))
+	ax = fig.add_subplot(111)
+
 	for i = 1:m
 		@show i
 		D2 .= pushforward_second_order.(u, q, Ref(s))	
@@ -51,7 +55,8 @@ function compute_w()
 			lc.set_array(nw)
 			lc.set_linewidth(2)
 
-			ax.clear()
+					
+			ax = fig.add_subplot(111)
 			ax.set_xlim([0,2*pi])
 			ax.set_ylim([0,2*pi])
 			ax.set_xlabel(L"$x_1$", fontsize=30)
@@ -68,12 +73,14 @@ function compute_w()
                                 maximum(nw)), 
 							   cmap=plt.get_cmap("cool")), ax=ax,
 								orientation="horizontal",shrink=0.4,
-								pad=0.06)
+								pad=0.2)
 
 			cbar.ax.tick_params(labelsize=30)
 			cbar.ax.xaxis.get_offset_text().set_fontsize(30)
-			pause(0.1)
-			savefig(string("plots/w_n_",i,".png"))
+			plt.tight_layout()
+	
+			savefig(string(filepath,"w_n_",i,".png"))
+		
 			cbar.remove()
 		end
 	end 
