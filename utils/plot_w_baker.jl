@@ -9,6 +9,8 @@ function compute_w()
 	u = [[x[i] + 2*pi*rand(),x[j] + 2*pi*rand()] 
 		 for i=1:n,j = 1:n][:]
 	q = [rand(2) for i=1:n, j=1:n][:]
+	w = [zeros(2) for i=1:n, j=1:n][:]
+	D2 = [zeros(2,2) for i=1:n, j=1:n][:]
 	n = length(u)
 	z = zeros(n)
 	pts = zeros(2, n)
@@ -24,10 +26,17 @@ function compute_w()
 	end
 	for i = 1:m
 		@show i
-
+		D2 .= pushforward_second_order.(u, q, Ref(s))	
+		for (k, uk) in enumerate(u)
+			w[k], z[k] = pushforward(uk, w[k], s)
+			w[k] ./= z[k]
+			q[k], z[k] = pushforward(uk, q[k], s)
+		end
+		w .+= tensordot(D2, q)./(z.*z)	
+		w .= w .- dot.(w, q).*q
 		if rem(i, 10) == 1
 			pts .= hcat(u...)
-			vecs .= hcat(q...)
+			vecs .= hcat(w...)
 			x_pts = [pts[1,:] - eps*vecs[1,:] pts[1,:] + eps*vecs[1,:]]'
 
 			y_pts =	[pts[2,:] - eps*vecs[2,:] pts[2,:] + eps*vecs[2,:]]' 
@@ -41,27 +50,26 @@ function compute_w()
 			ax.axis("scaled")
 
 			ax.plot(x_pts, y_pts, "r")
-			savefig(string("q_n_",i,".png"))
+			savefig(string("plots/w_n_",i,".png"))
 			#plt.pause(0.01)
 		end
 	end 
 	return pts, vecs
 
 end
+function tensordot(A, b)
+	return [Ai*b[i] for (i, Ai) in enumerate(A)]
+end
 function pushforward_second_order(u, v1, s)
 	d2u = d2step(u, s)
-	q = du*q
-	z = norm(q)
-	q ./= z
-	return q, z
+	d2u_v1 = reshape([dot(d2u[:,i], v1) for i=1:4], 2, 2)
+	return d2u_v1
 end
 
 function pushforward(u, q, s)
 	du = dstep(u, s)
 	q = du*q
-	z = norm(q)
-	q ./= z
-	return q, z
+	return q
 end
 function plot_one_step()
 	n_xq, n_yq = 20, 40
