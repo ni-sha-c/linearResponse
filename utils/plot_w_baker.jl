@@ -82,11 +82,14 @@ function plot_y(m)
 	u = [[x[i] + 2*pi*rand(),x[j] + 2*pi*rand()] 
 		 for i=1:n,j = 1:n][:]
 	q = [rand(2) for i=1:n, j=1:n][:]
-	v = [zeros(2) for i=1:n, j=1:n][:]
-	X = [zeros(2) for i=1:n, j=1:n][:]
+	w = [zeros(2) for i=1:n, j=1:n][:]
+	y = [zeros(2) for i=1:n, j=1:n][:]
+	D2 = [zeros(2,2) for i=1:n, j=1:n][:]
+	DX = [zeros(2,2) for i=1:n, j=1:n][:]
 	n = length(u)
 	z = zeros(n)
-	a = zeros(n)
+	delta = zeros(n)
+	ny = zeros(n)
 	segments = zeros(n, 2, 2)
 	eps = 1.e-1
 	filepath = string("/home/nishac/Research/PhDThesis/papers/",
@@ -98,25 +101,42 @@ function plot_y(m)
 		z .= norm.(q)
 		q .= q./z
 	end
+
+
 	for i = 1:m
 		@show i
+		D2 .= pushforward_second_order.(u, q, Ref(s))	
+		y .= pushforward.(u, y, Ref(s))
+		y .+= tensordot(D2, v)
 		X .= pert.(u, 1) .+ pert.(u, 3) 
+		DX .= dpert.(u,1) .+ dpert.(u,3)
 		v .= pushforward.(u, v, Ref(s))
 		v .+= X
+		w .= pushforward.(u, w, Ref(s))
+		w .+= tensordot(D2, q)
+
 		q .= pushforward.(u, q, Ref(s))
 		z .= norm.(q)
 		q .= q./z
+	
 		a .= dot.(v, q)
 		v .-= a.*q
+
+		w ./= (z.*z)
+		w .= w .- dot.(w, q).*q
+		y ./= z	
+		y .+= -a.*w .+ tensordot(DX, q)
+		delta .= dot.(y, q) .+ dot.(v, w)
+		y .-= delta.*q
 		u .= next.(u, Ref(s))
-	end
-	#a .= norm.(v)
+	end 
+	ny = norm.(y)
 	segments .= create_line_colls(u, q, eps)
 	lc = coll.LineCollection(segments, 
-						cmap=plt.get_cmap("coolwarm"),
-						norm=cs.Normalize(minimum(a),
-						maximum(a)))
-	lc.set_array(a)
+						cmap=plt.get_cmap("cool"),
+						norm=cs.Normalize(minimum(ny),
+						maximum(ny)))
+	lc.set_array(ny)
 	lc.set_linewidth(2)
 	
 	fig, ax = subplots(1,1)
@@ -131,9 +151,9 @@ function plot_y(m)
 	ax.axis("scaled")
 
 	cbar = fig.colorbar(cm.ScalarMappable(
-						norm=cs.Normalize(minimum(a),
-						maximum(a)), 
-					   cmap=plt.get_cmap("coolwarm")), ax=ax,
+						norm=cs.Normalize(minimum(ny),
+						maximum(ny)), 
+					   cmap=plt.get_cmap("cool")), ax=ax,
 						orientation="horizontal",shrink=0.4,
 						pad=0.1)
 
@@ -141,7 +161,7 @@ function plot_y(m)
 	cbar.ax.xaxis.get_offset_text().set_fontsize(30)
 	plt.tight_layout()
 	#savefig(string(filepath,"w_n_",m,".png"))
-	return segments, a
+	return segments, ny
 end
 
 function plot_v(m)
