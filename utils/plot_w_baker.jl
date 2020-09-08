@@ -109,7 +109,8 @@ function plot_v(m)
 		a .= dot.(v, q)
 		v .-= a.*q
 		u .= next.(u, Ref(s))
-	end 
+	end
+	a .= norm.(v)
 	segments .= create_line_colls(u, q, eps)
 	lc = coll.LineCollection(segments, 
 						cmap=plt.get_cmap("coolwarm"),
