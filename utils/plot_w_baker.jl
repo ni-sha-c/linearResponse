@@ -1,29 +1,61 @@
 include("../examples/baker.jl")
 using LinearAlgebra
-using Plots
+using PyPlot
 function compute_w()
-	s = [0.,0.,0.,0.]
-	n = 100
-	m = 10
-	x = LinRange(0.,1.,n)
-	u = [[x[i],x[j]] for i=1:n,j = 1:n][:]
+	s = [0.3, 0., 0.3, 0.0]
+	n = 120
+	m = 40
+	x = LinRange(0.,2*pi,n)
+	u = [[x[i] + 2*pi*rand(),x[j] + 2*pi*rand()] 
+		 for i=1:n,j = 1:n][:]
 	q = [rand(2) for i=1:n, j=1:n][:]
 	n = length(u)
+	z = zeros(n)
 	pts = zeros(2, n)
 	vecs = zeros(2, n)
-	eps = 5.e-2
-	@gif for i = 1:m
+	eps = 1.e-1
+	fig, ax = subplots(1,1)
+	for i = 1:m
 		@show i
-		pts .= hcat(u...)
-		vecs .= hcat(q...)
-		x_pts = [pts[1,:] - eps*vecs[1,:] pts[1,:] + eps*vecs[1,:]]' 
-		y_pts =	[pts[2,:] - eps*vecs[2,:] pts[2,:] + eps*vecs[2,:]]' 
-		plot(x_pts, y_pts, linecolor=:black, label=:false,
-			 axis=(font(25,"sans-serif")))
-	end every 5
+		u .= next.(u, Ref(s))
+		for (k, uk) in enumerate(u)
+			q[k], z[k] = pushforward(uk, q[k], s)
+		end
+	end
+	for i = 1:m
+		@show i
 
+		if rem(i, 10) == 1
+			pts .= hcat(u...)
+			vecs .= hcat(q...)
+			x_pts = [pts[1,:] - eps*vecs[1,:] pts[1,:] + eps*vecs[1,:]]'
+
+			y_pts =	[pts[2,:] - eps*vecs[2,:] pts[2,:] + eps*vecs[2,:]]' 
+			ax.clear()
+			ax.set_xlim([0,2*pi])
+			ax.set_ylim([0,2*pi])
+			ax.set_xlabel(L"$x_1$", fontsize=30)
+			ax.set_ylabel(L"$x_2$", fontsize=30)
+			ax.xaxis.set_tick_params(labelsize=30)
+			ax.yaxis.set_tick_params(labelsize=30)
+			ax.axis("scaled")
+
+			ax.plot(x_pts, y_pts, "r")
+			savefig(string("q_n_",i,".png"))
+			#plt.pause(0.01)
+		end
+	end 
+	return pts, vecs
 
 end
+function pushforward_second_order(u, v1, s)
+	d2u = d2step(u, s)
+	q = du*q
+	z = norm(q)
+	q ./= z
+	return q, z
+end
+
 function pushforward(u, q, s)
 	du = dstep(u, s)
 	q = du*q
