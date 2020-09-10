@@ -5,79 +5,9 @@ using PyCall
 @pyimport matplotlib.collections as coll 
 @pyimport matplotlib.colors as cs 
 @pyimport matplotlib.cm as cm 
-function plot_w(m)
-	s = [0.3, 0.1, 0.1, 1.0]
-	n = 100
-	x = LinRange(0.,2*pi,n)
-	u = [[x[i] + 2*pi*rand(),x[j] + 2*pi*rand()] 
-		 for i=1:n,j = 1:n][:]
-	q = [rand(2) for i=1:n, j=1:n][:]
-	w = [zeros(2) for i=1:n, j=1:n][:]
-	D2 = [zeros(2,2) for i=1:n, j=1:n][:]
-	n = length(u)
-	z = zeros(n)
-	nw = zeros(n)
-	segments = zeros(n, 2, 2)
-	eps = 1.e-1
-	filepath = string("/home/nishac/Research/PhDThesis/papers/",
-					  "Decomposition-of-Linear-Response/figs/")
-	for i = 1:20
-		@show i
-		u .= next.(u, Ref(s))
-		q .= pushforward.(u, q, Ref(s))
-		z .= norm.(q)
-		q .= q./z
-	end
-
-
-	for i = 1:m
-		@show i
-		D2 .= pushforward_second_order.(u, q, Ref(s))	
-		w .= pushforward.(u, w, Ref(s))
-		w .+= tensordot(D2, q)
-		q .= pushforward.(u, q, Ref(s))
-		z .= norm.(q)
-		q .= q./z
-		w ./= (z.*z)
-		w .= w .- dot.(w, q).*q
-		u .= next.(u, Ref(s))
-	end 
-	nw = norm.(w)
-	segments .= create_line_colls(u, q, eps)
-	lc = coll.LineCollection(segments, 
-						cmap=plt.get_cmap("cool"),
-						norm=cs.Normalize(minimum(nw),
-						maximum(nw)))
-	lc.set_array(nw)
-	lc.set_linewidth(2)
-	
-	fig, ax = subplots(1,1)
-	ax.set_xlim([0,2*pi])
-	ax.set_ylim([0,2*pi])
-	ax.set_xlabel(L"$x_1$", fontsize=30)
-	ax.set_ylabel(L"$x_2$", fontsize=30)
-	ax.xaxis.set_tick_params(labelsize=30)
-	ax.yaxis.set_tick_params(labelsize=30)
-
-	ax.add_collection(lc)
-	ax.axis("scaled")
-
-	cbar = fig.colorbar(cm.ScalarMappable(
-						norm=cs.Normalize(minimum(nw),
-						maximum(nw)), 
-					   cmap=plt.get_cmap("cool")), ax=ax,
-						orientation="horizontal",shrink=0.4,
-						pad=0.1)
-
-	cbar.ax.tick_params(labelsize=30)
-	cbar.ax.xaxis.get_offset_text().set_fontsize(30)
-	plt.tight_layout()
-	#savefig(string(filepath,"w_n_",m,".png"))
-	return segments, nw
-end
 function plot_y(m)
 	s = [0.3, 0., 0.3, 0.0]
-	n = 180
+	n = 400
 	x = LinRange(0.,2*pi,n)
 	u = [[x[i] + 2*pi*rand(),x[j] + 2*pi*rand()] 
 		 for i=1:n,j = 1:n][:]
@@ -133,7 +63,7 @@ function plot_y(m)
 		delta .= dot.(y, q) .+ dot.(v, w)
 		y .-= delta.*q
 		u .= next.(u, Ref(s))
-	end 
+	end
 	qperp = [[-qi[2], qi[1]] for qi in q]
 	ny = dot.(y, qperp) 
 	segments .= create_line_colls(u, q, eps)
@@ -187,7 +117,7 @@ end
 
 function plot_v(m)
 	s = [0.1, 0.1, 0., 0.1]
-	n = 180
+	n = 400
 	x = LinRange(0.,2*pi,n)
 	u = [[x[i] + 2*pi*rand(),x[j] + 2*pi*rand()] 
 		 for i=1:n,j = 1:n][:]
@@ -199,8 +129,10 @@ function plot_v(m)
 	a = zeros(n)
 	segments = zeros(n, 2, 2)
 	eps = 1.e-1
+	eps1 = 1.e-4
 	filepath = string("/home/nishac/Research/PhDThesis/papers/",
 					  "Decomposition-of-Linear-Response/figs/")
+	y_pos = 1.0
 	for i = 1:20
 		@show i
 		u .= next.(u, Ref(s))
@@ -219,7 +151,11 @@ function plot_v(m)
 		a .= dot.(v, q)
 		v .-= a.*q
 		u .= next.(u, Ref(s))
+
 	end
+	inds = [abs(uk[2] - y_pos) < eps1 for uk in u]
+	u, v, q = u[inds], v[inds], q[inds]
+	#=
 	a .= norm.(v)
 	segments .= create_line_colls(u, q, eps)
 	lc = coll.LineCollection(segments, 
@@ -265,9 +201,9 @@ function plot_v(m)
 
 	ax.plot(x_pts, y_pts, "royalblue")
 	ax.axis("scaled")
+	=#
 
-
-	return segments, a
+	return u
 end
 function tensordot(A, b)
 	return [Ai*b[i] for (i, Ai) in enumerate(A)]
