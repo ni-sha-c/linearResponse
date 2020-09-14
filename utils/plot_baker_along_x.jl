@@ -48,7 +48,8 @@ function plot_y(m)
 		y .= pushforward.(u, y, Ref(s))
 		y .+= tensordot(D2, v)
 		X .= pert.(u, 1) .+ pert.(u, 2) .+ pert.(u, 4) 
-		DX .= dpert.(u,1) .+ dpert.(u, 2) .+ dpert.(u, 4)
+		DX .= dpert.(u, s, 1) .+ dpert.(u, s, 2) .+ 
+		dpert.(u, s, 4)
 		v .= pushforward.(u, v, Ref(s))
 		v .+= X
 		w .= pushforward.(u, w, Ref(s))

@@ -96,10 +96,12 @@ function pert(u::Array{Float64,1}, p::Int64)
 		return 0
 	end
 end
-function dpert(u::Array{Float64,1}, p::Int64)
+function dpert(u::Array{Float64,1},s::Array{Float64,1},
+			   p::Int64)
 	x, y = u[1], u[2]
 	sx, sy = sin(x), sin(2*y)/2
 	dsx, dsy = cos(x), cos(2*y)
+	du = dstep(u, s)
 	if p==1
 		return [dsx 0; 0 0]
 	elseif p==2
