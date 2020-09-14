@@ -18,7 +18,8 @@ function plot_y(m)
 	X = [zeros(2) for i=1:n, j=1:n][:]
 
 	D2 = [zeros(2,2) for i=1:n, j=1:n][:]
-	DX = [zeros(2,2) for i=1:n, j=1:n][:]
+	DXx = [zeros(2) for i=1:n, j=1:n][:]
+
 	n = length(u)
 	z = zeros(n)
 	a = zeros(n)
@@ -48,8 +49,7 @@ function plot_y(m)
 		y .= pushforward.(u, y, Ref(s))
 		y .+= tensordot(D2, v)
 		X .= pert.(u, 1) .+ pert.(u, 2) .+ pert.(u, 4) 
-		DX .= dpert.(u, s, 1) .+ dpert.(u, s, 2) .+ 
-		dpert.(u, s, 4)
+		DXx .= dpert_x.(u, Ref(s))
 		v .= pushforward.(u, v, Ref(s))
 		v .+= X
 		w .= pushforward.(u, w, Ref(s))
@@ -65,7 +65,7 @@ function plot_y(m)
 		w ./= (z.*z)
 		w .= w .- dot.(w, q).*q
 		y ./= z	
-		y .+= -a.*w .+ tensordot(DX, q)
+		y .+= -a.*w .+ DXx
 		delta .= dot.(y, q) .+ dot.(v, w)
 		y .-= delta.*q
 		u .= next.(u, Ref(s))

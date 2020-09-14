@@ -103,7 +103,7 @@ function dpert_x(u::Array{Float64,1},s::Array{Float64,1})
 	cx = cos(x)
 	dxu = 2 .+ s[1]*dsx .+ s[2]*sy.*dsx 
 	dxpx1 = cx + cx*sy 
-	return dxpx1/dxu
+	return [dxpx1/dxu, 0.]
 end
 function d2step(u::Array{Float64,2}, s::Array{Float64,1})
 	n = size(u)[2]
