@@ -96,25 +96,14 @@ function pert(u::Array{Float64,1}, p::Int64)
 		return 0
 	end
 end
-function dpert(u::Array{Float64,1},s::Array{Float64,1},
-			   p::Int64)
+function dpert_x(u::Array{Float64,1},s::Array{Float64,1})
+	# here we asssume s = [a, a, 0, a]
 	x, y = u[1], u[2]
 	sx, sy = sin(x), sin(2*y)/2
-	dsx, dsy = cos(x), cos(2*y)
-	du = dstep(u, s)
-	if p==1
-		return [dsx 0; 0 0]
-	elseif p==2
-		return [sy*dsx dsy*sx;0 0]
-	elseif p==3
-		return [0 0; sy*dsx dsy*sx] 
-	elseif p==4
-		return [0 0; 0  dsy]
-	else
-		println("parameter perturbation is only defined 
-				for indices 1 through 4")
-		return 0
-	end
+	cx = cos(x)
+	dxu = 2 .+ s[1]*dsx .+ s[2]*sy.*dsx 
+	dxpx1 = cx + cx*sy 
+	return dxpx1/dxu
 end
 function d2step(u::Array{Float64,2}, s::Array{Float64,1})
 	n = size(u)[2]
