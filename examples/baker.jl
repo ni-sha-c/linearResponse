@@ -101,7 +101,7 @@ function dpert_x(u::Array{Float64,1},s::Array{Float64,1})
 	x, y = u[1], u[2]
 	sx, sy = sin(x), sin(2*y)/2
 	cx = cos(x)
-	dxu = 2 .+ s[1]*dsx .+ s[2]*sy.*dsx 
+	dxu = 2 .+ s[1]*cx .+ s[2]*sy.*cx 
 	dxpx1 = cx + cx*sy 
 	return [dxpx1/dxu, 0.]
 end

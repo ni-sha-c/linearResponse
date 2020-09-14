@@ -6,7 +6,7 @@ using PyCall
 @pyimport matplotlib.colors as cs 
 @pyimport matplotlib.cm as cm 
 function plot_y(m)
-	s = [0.1, 0.1, 0., 0.1]
+	s = [0.3, 0.3, 0., 0.3]
 	n = 400
 	x = LinRange(0.,2*pi,n)
 	u = [[x[i] + 2*pi*rand(),x[j] + 2*pi*rand()] 
@@ -37,7 +37,7 @@ function plot_y(m)
 		z .= norm.(q)
 		q .= q./z
 	end
-	y_pos = 6.0
+	y_pos = 2.0
 	x = Array{Float64}[]
 	yx = Array{Array{Float64}}[]
 	vx = Array{Array{Float64}}[]
@@ -90,15 +90,14 @@ function plot_y(m)
 	ax.xaxis.set_tick_params(labelsize=30)
 	ax.yaxis.set_tick_params(labelsize=30)
 	plt.tight_layout()
-	ax.plot(x, vxy,".", label=L"$v_{x_1}(x_2 = 6.0)$", ms=2.0, color="royalblue")
-	#ax.plot([(x .- eps)'[1:10:end] .% (2*pi); 
-	#		(x .+ eps)'[1:10:end] .% (2*pi)], 
-	#		[(vxy .- eps*yxy)'[1:10:end]; 
-	#		 (vxy .+ eps*yxy)'[1:10:end]],
-	#		color="blue")  
-	#ax.plot(x, vx,".", color="darkcyan")
+	ax.plot(x, vxy,".", label=L"$v_{x_2}(x_2 = 6.0)$", ms=2.0, color="royalblue")
+	ax.plot([(x .- eps)'[1:10:end] .% (2*pi); 
+			(x .+ eps)'[1:10:end] .% (2*pi)], 
+			[(vxy .- eps*yxy)'[1:10:end]; 
+			 (vxy .+ eps*yxy)'[1:10:end]],
+			color="blue")  
 
-	ax.set_aspect(1.5)
+	#ax.set_aspect(1.5)
 	ax.grid(true)
 	leg = ax.legend(loc="right", bbox_to_anchor=(0.8,0.2), 
 					fontsize=30, framealpha=0)
@@ -136,7 +135,7 @@ function plot_v(m)
 	end
 	for i = 1:m
 		@show i
-		X .= pert.(u, 1) .+ pert.(u, 3) 
+		X .= pert.(u, 1) .+ pert.(u, 2) .+ pert.(u, 4) 
 		v .= pushforward.(u, v, Ref(s))
 		v .+= X
 		q .= pushforward.(u, q, Ref(s))
