@@ -210,7 +210,7 @@ function plot_v(m)
 	end
 	for i = 1:m
 		@show i
-		X .= pert.(u, 1) .+ pert.(u, 3) 
+		X .= pert.(u, 1) .+ pert.(u, 2) .+ pert.(u, 4) 
 		v .= pushforward.(u, v, Ref(s))
 		v .+= X
 		q .= pushforward.(u, q, Ref(s))

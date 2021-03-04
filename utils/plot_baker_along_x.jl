@@ -6,7 +6,7 @@ using PyCall
 @pyimport matplotlib.colors as cs 
 @pyimport matplotlib.cm as cm 
 function plot_y(m)
-	s = [0.3, 0.3, 0., 0.3]
+	s = [0.3, 0.3, 0.3, 0.0]
 	n = 400
 	x = LinRange(0.,2*pi,n)
 	u = [[x[i] + 2*pi*rand(),x[j] + 2*pi*rand()] 
@@ -48,7 +48,7 @@ function plot_y(m)
 		D2 .= pushforward_second_order.(u, q, Ref(s))	
 		y .= pushforward.(u, y, Ref(s))
 		y .+= tensordot(D2, v)
-		X .= pert.(u, 1) .+ pert.(u, 2) .+ pert.(u, 4) 
+		X .= pert.(u, 1) .+ pert.(u, 2) .+ pert.(u, 3) 
 		DXx .= dpert_x.(u, Ref(s))
 		v .= pushforward.(u, v, Ref(s))
 		v .+= X
@@ -91,11 +91,11 @@ function plot_y(m)
 	ax.yaxis.set_tick_params(labelsize=30)
 	plt.tight_layout()
 	ax.plot(x, vxy,".", label=L"$v_{x_2}(x_2 = 6.0)$", ms=2.0, color="royalblue")
-	ax.plot([(x .- eps)'[1:10:end] .% (2*pi); 
-			(x .+ eps)'[1:10:end] .% (2*pi)], 
-			[(vxy .- eps*yxy)'[1:10:end]; 
-			 (vxy .+ eps*yxy)'[1:10:end]],
-			color="blue")  
+	#ax.plot([(x .- eps)'[1:10:end] .% (2*pi); 
+	#		(x .+ eps)'[1:10:end] .% (2*pi)], 
+	#		[(vxy .- eps*yxy)'[1:10:end]; 
+	#		 (vxy .+ eps*yxy)'[1:10:end]],
+#			color="blue")  
 
 	#ax.set_aspect(1.5)
 	ax.grid(true)
