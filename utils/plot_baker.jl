@@ -235,3 +235,35 @@ function plot_annotated_map_vertical_strips(s)
 	ax1.axis("scaled")
 
 end
+function plot_annotated_map_horizontal_strips(s)
+	N = 500000
+	n_gr = 20
+	fig = figure(figsize=(8,6))
+	ax = fig.add_subplot(111)
+
+	fig1 = figure(figsize=(8,6))
+	ax1 = fig1.add_subplot(111)
+	ax.set_xlim([0.,2π])
+	ax.set_ylim([0.,2π])
+	ax1.set_xlim([0.,2π])
+	ax1.set_ylim([0.,2π])
+
+	for j = 1:n_gr
+		u1 = [[2π/n_gr*rand() + (j-1)*2π/n_gr, 2π*rand()] for i=1:N]
+		u1_next = next.(u1, Ref(s))
+		u1_next = hcat(u1_next...)
+		u1 = hcat(u1...)
+
+	
+		ax1.plot(u1_next[1,:], u1_next[2,:],".",ms=1.)
+		ax.plot(u1[1,:], u1[2,:],".")
+	end
+	ax.xaxis.set_tick_params(labelsize=30)
+	ax1.xaxis.set_tick_params(labelsize=30)
+	ax.yaxis.set_tick_params(labelsize=30)
+	ax1.yaxis.set_tick_params(labelsize=30)
+
+	ax.axis("scaled")
+	ax1.axis("scaled")
+
+end
