@@ -203,3 +203,40 @@ function plot_annotated_map_original(s)
 	ax1.axis("scaled")
 
 end
+function plot_annotated_map_perturbed(s)
+	N = 500000
+	fig = figure(figsize=(8,6))
+	ax = fig.add_subplot(111)
+
+	fig1 = figure(figsize=(8,6))
+	ax1 = fig1.add_subplot(111)
+	ax.set_xlim([0.,2π])
+	ax.set_ylim([0.,2π])
+	ax1.set_xlim([0.,2π])
+	ax1.set_ylim([0.,2π])
+
+	u1 = [[π*rand(), 2π*rand()] for i=1:N]
+	u2 = [[π*rand() + π, 2π*rand()] for i=1:N]
+	u1_next = next.(u1, Ref(s))
+	u1_next = hcat(u1_next...)
+	u1 = hcat(u1...)
+	u2_next = next.(u2, Ref(s))
+	u2_next = hcat(u2_next...)
+	u2 = hcat(u2...)
+
+
+	
+	ax1.plot(u1_next[1,:], u1_next[2,:],".",ms=1.)
+	ax1.plot(u2_next[1,:], u2_next[2,:],".",ms=1.)
+	ax.plot(u1[1,:], u1[2,:],".")
+	ax.plot(u2[1,:], u2[2,:],".")
+
+	ax.xaxis.set_tick_params(labelsize=30)
+	ax1.xaxis.set_tick_params(labelsize=30)
+	ax.yaxis.set_tick_params(labelsize=30)
+	ax1.yaxis.set_tick_params(labelsize=30)
+
+	ax.axis("scaled")
+	ax1.axis("scaled")
+
+end
