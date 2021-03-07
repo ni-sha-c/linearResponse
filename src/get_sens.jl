@@ -13,7 +13,7 @@ function sens(s,nSteps)
 	q = rand(2)
 	q /= norm(q)
 
-	pp = pert(u_trj, 1) .+ pert(u_trj,3)
+	pp = pert(u_trj, 2)
 	q1 = rand(2)
 	vs1 = zeros(2)
 	
@@ -35,13 +35,19 @@ function sens(s,nSteps)
 	Dq = zeros(2)
 	Dvs = zeros(2)
 	Dvs1 = zeros(2)
-	
+	s2 = s[2]
 	# nSteps large number.
 	for i = 1:nSteps-1
 		dui = du_trj[:,:,i] # for large systems, can't store Jacobian.
 		ppi = pp[:,i]
 		xi, yi = x[i], y[i]
-		dppi = [cos(xi) 0; cos(xi)*sin(yi) sin(xi)*cos(yi)]
+		#dppi = [cos(xi) 0; cos(xi)*sin(yi) sin(xi)*cos(yi)]
+		sxi, cxi = sin(xi), cos(xi)
+		syi, cyi = sin(2*yi), cos(2*yi)
+		du11 = 2 + s2*syi*sxi/2
+		du12 = s2*sxi*cyi
+		dppi = [syi*cxi/2 cyi*sxi; 0. 0]*
+		[1/du11 -2*du12/du11; 0 2.]
 		q1 .= dui*q
 		z = norm(q1)
 		q1 ./= z
@@ -104,7 +110,7 @@ function get_sens(s)
 		dJds[k] = sum(dJds_proc)
 		@show dJds[k]
 	end
-	save("../data/sens/dJds.jld", "s1",
-	     s[1,:], "dJds", dJds)
+	save("../data/sens/dJds_s2.jld", "s2",
+	     s[2,:], "dJds", dJds)
 end
 	

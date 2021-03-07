@@ -6,10 +6,10 @@ function plot_sens()
 	J_arr = X["J"]
 	fig, ax = subplots(1,1)
 	ax.plot(s1_arr, J_arr, ".", ms=10.0)
-    ax.xaxis.set_tick_params(labelsize=28)
-    ax.yaxis.set_tick_params(labelsize=28)
-    ax.set_xlabel(L"$s_1, s_3$",fontsize=28)
-    ax.set_ylabel(L"$\langle J\rangle$",fontsize=28)
+    ax.xaxis.set_tick_params(labelsize=32)
+    ax.yaxis.set_tick_params(labelsize=32)
+    ax.set_xlabel(L"$s_1, s_3$",fontsize=32)
+    ax.set_ylabel(L"$\langle J\rangle$",fontsize=32)
 	ax.grid(true)
 	
 	X = load("../data/sens/dJds.jld")
@@ -30,7 +30,7 @@ function plot_sens()
 	ax.plot(s_pts[:,1:n-1], J_pts[:,1:n-1], "k",lw=6.0)
 	ax.plot(s_pts[:,n], J_pts[:,n], "k",lw=6.0,label=L"$d_s\langle J\rangle$ from S3")
 
-	ax.legend(fontsize=28)
+	ax.legend(fontsize=32)
 
 	return dJds
 	
