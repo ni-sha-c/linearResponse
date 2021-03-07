@@ -44,7 +44,7 @@ function sens(s,nSteps)
 		#dppi = [cos(xi) 0; cos(xi)*sin(yi) sin(xi)*cos(yi)]
 		sxi, cxi = sin(xi), cos(xi)
 		syi, cyi = sin(2*yi), cos(2*yi)
-		du11 = 2 + s2*syi*sxi/2
+		du11 = 2 + s2*syi*cxi/2
 		du12 = s2*sxi*cyi
 		dppi = [syi*cxi/2 cyi*sxi; 0. 0]*
 		[1/du11 -2*du12/du11; 0 2.]
