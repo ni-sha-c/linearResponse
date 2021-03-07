@@ -169,8 +169,8 @@ function plot_mapping_vs_params()
 end
 function plot_annotated_map_rectangles(s)
 	N = 500000
-	n_gr_x = 2
-	n_gr_y = 8
+	n_gr_x = 8
+	n_gr_y = 2
 	dx = 2π/n_gr_x
 	dy = 2π/n_gr_y
 	fig = figure(figsize=(8,6))

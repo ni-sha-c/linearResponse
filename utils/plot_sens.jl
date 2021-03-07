@@ -5,7 +5,7 @@ function plot_sens()
 	s1_arr = X["s1"]
 	J_arr = X["J"]
 	fig, ax = subplots(1,1)
-	ax.plot(s1_arr, J_arr, "v", ms=4.0)
+	ax.plot(s1_arr, J_arr, ".", ms=10.0)
     ax.xaxis.set_tick_params(labelsize=28)
     ax.yaxis.set_tick_params(labelsize=28)
     ax.set_xlabel(L"$s_1, s_3$",fontsize=28)
@@ -27,7 +27,10 @@ function plot_sens()
 	s_pts = reshape([s1 .- eps s1 .+ eps], n, 
 					2)'
 
-	ax.plot(s_pts, J_pts, "k",lw=2.0)
+	ax.plot(s_pts[:,1:n-1], J_pts[:,1:n-1], "k",lw=6.0)
+	ax.plot(s_pts[:,n], J_pts[:,n], "k",lw=6.0,label=L"$d_s\langle J\rangle$ from S3")
+
+	ax.legend(fontsize=28)
 
 	return dJds
 	
