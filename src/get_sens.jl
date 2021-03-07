@@ -15,11 +15,10 @@ function sens(s,nSteps)
 	q1 = rand(2)
 	vs1 = zeros(2)
 	
-	pp = pert(u_trj, 1) .+ pert(u_trj,3)
-	@show size(pp)
+	pp = pert(u_trj, 1) + pert(u_trj, 3) 
 	dJds_st = 0.
 	dJds_ust = 0.
-	N = 11
+	N = 5
 	nSteps = nSteps + 1
 	g = zeros(nSteps)
 	J = cos.(4*y)
@@ -52,17 +51,20 @@ function sens(s,nSteps)
 		
 		d2q = reshape([dot(ddu_trj[:,j,i],
 					q) for j=1:4],2,2)
-		dz = d2q*q/z2 + dui*Dq/z2
-		dzdx = dot(dz, q)
-		Dq .= dz - dzdx*q
+		Dq = d2q*q/z2 + dui*Dq/z2
+		dzdx = dot(z2*Dq, q1)
+		Dq .= Dq .- dot(Dq,q1)*q1
 		
-		Dvs1 .= d2q*vs/z + dui*Dvs/z + dppi*q1
+
+
+		Dvs1 .= d2q*vs/z + dui*Dvs/z + dppi*q1/z
 		Da[i+1] = dot(vs1, Dq) + dot(Dvs1, q1)
 		Dvs1 .= Dvs1 - Da[i+1]*q1 - a[i+1]*Dq
 		Delta_Da = dot(Dvs1, q1) + dot(vs1, Dq) 
-		Dvs .-= Delta_Da*q
+		Dvs1 .-= Delta_Da*q
 		Da[i+1] += Delta_Da
-		g[i+1] = g[i]/z - dzdx/z*z 
+		
+		g[i+1] = g[i]/z - dzdx/z2 
 		dJdu = [0., -4*sin(4*yi)]
 		dJds_st += dot(dJdu, vs)/nSteps
 
@@ -76,8 +78,8 @@ function sens(s,nSteps)
 		J_shift = J[n+1:end]
 		nJ = length(J_shift)
 		g_shift = g[2:nJ+1]
-		Da_shift = Da[1:nJ]
-		a_shift = a[1:nJ]
+		Da_shift = Da[2:nJ+1]
+		a_shift = a[2:nJ+1]
 		dJds_ust -= dot(J_shift,Da_shift)/nJ 
 		dJds_ust -= dot(J_shift,g_shift.*a_shift)/nJ
 	end
