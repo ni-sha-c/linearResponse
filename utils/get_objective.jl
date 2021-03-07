@@ -16,9 +16,9 @@ function obj_fun_erg_avg(s)
 end
 function get_Javg_vs_s(ind)
 	s = zeros(4)
-	n_pts = 30
+	n_pts = 10
 	n_rep = 16000
-	s_ind = LinRange(0.,0.4,n_pts)
+	s_ind = LinRange(0.,1.0,n_pts)
 	J = zeros(n_pts)
 	J_proc = SharedArray{Float64}(n_rep)
 	for i = 1:n_pts

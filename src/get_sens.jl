@@ -19,7 +19,7 @@ function sens(s,nSteps)
 	
 	dJds_st = 0.
 	dJds_ust = 0.
-	N = 5
+	N = 12
 	nSteps = nSteps + 1
 	g = zeros(nSteps)
 	J = cos.(4*y)
@@ -93,11 +93,11 @@ function sens(s,nSteps)
 		dJds_ust -= dot(J_shift,Da_shift)/nJ 
 		dJds_ust -= dot(J_shift,g_shift.*a_shift)/nJ
 	end
-	#@show le, dJds
+	@show dJds_st
 	return dJds_st + dJds_ust
 end
 function get_sens(s)
-	nSteps = 100000
+	nSteps = 500000
 	# J = cos(4y)
 	n_exps = size(s)[2]
 	dJds = zeros(n_exps)
