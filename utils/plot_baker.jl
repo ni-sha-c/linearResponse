@@ -167,15 +167,45 @@ function plot_mapping_vs_params()
 		
 	end
 end
+function plot_annotated_map_rectangles(s)
+	N = 500000
+	n_gr_x = 8
+	n_gr_y = 2
+	dx = 2π/n_gr_x
+	dy = 2π/n_gr_y
+	fig = figure(figsize=(8,6))
+	ax = fig.add_subplot(111)
+	clrs = matplotlib.cm["tab20c"]
+	fig1 = figure(figsize=(8,6))
+	ax1 = fig1.add_subplot(111)
+	ax.set_xlim([0.,2π])
+	ax.set_ylim([0.,2π])
+	ax1.set_xlim([0.,2π])
+	ax1.set_ylim([0.,2π])
 
+	for j = 1:n_gr_x
+		x = (j-1)*dx
+		for k = 1:n_gr_y 
+			y = (k-1)*dy
+			u1 = [[x + rand()*dx, y + rand()*dy] for i=1:N]
+			u1_next = next.(u1, Ref(s))
+			u1_next = hcat(u1_next...)
+			u1 = hcat(u1...)
 
+			ind = k + (j-1)*n_gr_y
+			if (ind > 20) 
+					ind = mod(ind, 20)
+			end
+			ax1.plot(u1_next[1,:], u1_next[2,:],".",color=clrs.colors[ind],ms=1.)
+			ax.plot(u1[1,:], u1[2,:],".", color=clrs.colors[ind], ms=1.0)
+		end
+	end
+	ax.xaxis.set_tick_params(labelsize=30)
+	ax1.xaxis.set_tick_params(labelsize=30)
+	ax.yaxis.set_tick_params(labelsize=30)
+	ax1.yaxis.set_tick_params(labelsize=30)
 
+	ax.axis("scaled")
+	ax1.axis("scaled")
 
-
-
-
-
-
-
-
-
+end
