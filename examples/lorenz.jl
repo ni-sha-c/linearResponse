@@ -91,29 +91,33 @@ function next(u, s)
 end
 
 function dstep(u::Array{Float64,1},s::Array{Float64,1})
-	du = zeros(2,2)
-	x, y = u[1], u[2]
-	sx, sy = sin(x), sin(2*y)/2
-	dsx, dsy = cos(x), cos(2*y)
-	du[1,1] = 2 + s[1]*dsx + s[2]*sy*dsx 
-	du[1,2] = s[2]*sx*dsy
-	du[2,1] = s[3]*dsx*sy
-	du[2,2] = 0.5 + s[4]*dsy + s[3]*sx*dsy
+	du = zeros(3,3)
+	x, y, z = u[1], u[2], u[3]
+	sigma, rho, beta = s
+    @. du[1,1] = 1.0 - dt*sigma
+    @. du[1,2] = dt*sigma
+    @. du[2,1] = dt*(rho - z) 
+    @. du[2,2] = 1.0 - dt
+    @. du[2,3] = -dt*x 
+    @. du[3,1] = dt*y
+    @. du[3,2] = dt*x
+    @. du[3,3] = 1.0 - dt*beta
 	return du
 end
 
 function dstep(u::Array{Float64,2},s::Array{Float64,1})
 	n = size(u)[2]
-	du = zeros(2,2,n)
-	x, y = view(u,1,:),view(u,2,:)
-	sx, sy = sin.(x), sin.(2*y)/2
-	dsx, dsy = cos.(x), cos.(2*y)
-	du[1,1,:] = 2 .+ s[1]*dsx .+ 
-				s[2]*sy.*dsx 
-	du[1,2,:] = s[2]*sx.*dsy
-	du[2,1,:] = s[3]*dsx.*sy
-	du[2,2,:] = 0.5 .+ s[4]*dsy .+ 
-				s[3]*sx.*dsy
+	du = zeros(3,3,n)
+	x, y, z = view(u,1,:),view(u,2,:),view(u,3,:)
+	sigma, rho, beta = s
+	@. du[1,1,:] = 1.0 - dt*sigma
+    @. du[1,2,:] = dt*sigma
+    @. du[2,1,:] = dt*(rho - z) 
+    @. du[2,2,:] = 1.0 - dt
+    @. du[2,3,:] = -dt*x 
+    @. du[3,1,:] = dt*y
+    @. du[3,2,:] = dt*x
+    @. du[3,3,:] = 1.0 - dt*beta
 	return du
 end
 function pert(u::Array{Float64,2}, p::Int64)
