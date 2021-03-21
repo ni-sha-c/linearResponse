@@ -130,13 +130,11 @@ end
 function pert(u::Array{Float64,1},s::Array{Float64,1})
 	return [0, dt*u[1]*s[2], 0]
 end
-function dpert_x(u::Array{Float64,1},s::Array{Float64,1})
-	x, y = u[1], u[2]
-	sx, sy = sin(x), sin(2*y)/2
-	cx = cos(x)
-	dxu = 2 .+ s[1]*cx .+ s[2]*sy.*cx 
-	dxpx1 = cx + cx*sy 
-	return [dxpx1/dxu, 0.]
+function dpert(u::Array{Float64,1},s::Array{Float64,1})
+	x = u[1]
+	dpp = zeros(3,3)
+	dpp[2,1] = dt*s[2]
+	return dpp
 end
 function d2step(u::Array{Float64,2}, s::Array{Float64,1})
 	n = size(u)[2]
