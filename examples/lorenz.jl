@@ -84,21 +84,6 @@ function obj_fun(u0, s)
 end
 
 
-function dstep(u::Array{Float64,2},s::Array{Float64,1})
-	n = size(u)[2]
-	du = zeros(3,3,n)
-	x, y, z = view(u,1,:),view(u,2,:),view(u,3,:)
-	sigma, rho, beta = s
-	@. du[1,1,:] = 1.0 - dt*sigma
-    @. du[1,2,:] = dt*sigma
-    @. du[2,1,:] = dt*(rho - z) 
-    @. du[2,2,:] = 1.0 - dt
-    @. du[2,3,:] = -dt*x 
-    @. du[3,1,:] = dt*y
-    @. du[3,2,:] = dt*x
-    @. du[3,3,:] = 1.0 - dt*beta
-	return du
-end
 function pert(u::Array{Float64,2},s::Array{Float64,1})
 	n = size(u)[2]
 	x = view(u,1,:)
