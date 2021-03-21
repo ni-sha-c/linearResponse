@@ -34,16 +34,10 @@ function dlorenz63(u, s)
     return reshape([du[:,:,1]'; du[:,:,2]'; 
     				du[:,:,3]'], d, d, n)
 end
-function perturbation(u,s)
-    n, d = size(u)
-    # the perturbation in row i in T_{u_(i+1)} M
-    return [zeros(1,n); dt*u[:,1]'; zeros(1,n)]
-end
 function vectorField(u,s)
-    n, d = size(u)
+    d, n = size(u)
     sigma, rho, beta = s
-    u = u'
-    x, y, z = u[1,:], u[2,:], u[3,:]
+	x, y, z = view(u,1,:), view(u,2,:), view(u,3,:)
     return [sigma.*(y - x)  x.*(rho .- z) - y  x.*y - beta.*z]'
 end
 function lorenz63_rhs_ad(du, u, s, t)
@@ -124,16 +118,16 @@ function pert(u::Array{Float64,2},s::Array{Float64,1})
 	n = size(u)[2]
 	x = view(u,1,:)
 	pp = zeros(3, n)
-	@. pp[2,:] = dt*x*s[2]
+	@. pp[2,:] = dt*x
 	return pp
 end
 function pert(u::Array{Float64,1},s::Array{Float64,1})
-	return [0, dt*u[1]*s[2], 0]
+	return [0, dt*u[1], 0]
 end
 function dpert(u::Array{Float64,1},s::Array{Float64,1})
 	x = u[1]
 	dpp = zeros(3,3)
-	dpp[2,1] = dt*s[2]
+	dpp[2,1] = dt
 	return dpp
 end
 function d2step(u::Array{Float64,2}, s::Array{Float64,1})
