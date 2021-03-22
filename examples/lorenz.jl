@@ -46,14 +46,14 @@ function dstep(u::Array{Float64,1},s::Array{Float64,1})
     du = zeros(3,3)
     x, y, z = u[1], u[2], u[3]
     sigma, rho, beta = s
-    @. du[1,1] = 1.0 - dt*sigma
-    @. du[1,2] = dt*sigma
-    @. du[2,1] = dt*(rho - z) 
-    @. du[2,2] = 1.0 - dt
-    @. du[2,3] = -dt*x 
-    @. du[3,1] = dt*y
-    @. du[3,2] = dt*x
-    @. du[3,3] = 1.0 - dt*beta
+    du[1,1] = 1.0 - dt*sigma
+    du[1,2] = dt*sigma
+    du[2,1] = dt*(rho - z) 
+    du[2,2] = 1.0 - dt
+    du[2,3] = -dt*x 
+    du[3,1] = dt*y
+    du[3,2] = dt*x
+    du[3,3] = 1.0 - dt*beta
     return du
 end
 function d2step(u::Array{Float64,2}, s::Array{Float64,1})
@@ -99,25 +99,26 @@ function dpert(u::Array{Float64,1},s::Array{Float64,1})
     dpp = zeros(3,3)
     dpp[2,:] .= dt
     deno  = 1/(dt^3*sigma*(beta*(rho - z - 1) + x*(y - x)) + dt^2*(sigma*(-rho + beta + z + 1) + beta + x^2) - dt*(sigma + beta + 1) + 1)
-    du11 = (dt^2*beta + dt^2*x^2 - dt*beta - dt + 1)/deno
-    du12 = (dt^2*sigma*beta - dt*sigma)/deno 
-    du13 = (-dt^2*sigma*x)/deno
-    dpp[2,1,:] .*= du11
-    dpp[2,2,:] .*= du12
-    dpp[2,3,:] .*= du13
+    du11 = (dt^2*beta + dt^2*x^2 - dt*beta - dt + 1)*deno
+    du12 = (dt^2*sigma*beta - dt*sigma)*deno 
+    du13 = (-dt^2*sigma*x)*deno
+    dpp[2,1] *= du11
+    dpp[2,2] *= du12
+    dpp[2,3] *= du13
    
     return dpp
 end
 function dpert(u::Array{Float64,2},s::Array{Float64,1})
     x, y, z = u[1,:], u[2,:], u[3,:]
     sigma, rho, beta = s
-    dpp = zeros(3,3,:)
+    n = size(u)[2]
+    dpp = zeros(3,3,n)
     dpp[2,:,:] .= dt
     
-    deno  = 1/(dt^3*sigma*(beta*(rho - z - 1) + x*(y - x)) + dt^2*(sigma*(-rho + beta + z + 1) + beta + x^2) - dt*(sigma + beta + 1) + 1)
-    du11 = @. (dt^2*beta + dt^2*x^2 - dt*beta - dt + 1)/deno
-    du12 = @. (dt^2*sigma*beta - dt*sigma)/deno 
-    du13 = @. (-dt^2*sigma*x)/deno
+    deno  = @. 1/(dt^3*sigma*(beta*(rho - z - 1) + x*(y - x)) + dt^2*(sigma*(-rho + beta + z + 1) + beta + x^2) - dt*(sigma + beta + 1) + 1)
+    du11 = @. (dt^2*beta + dt^2*x^2 - dt*beta - dt + 1)*deno
+    du12 = @. (dt^2*sigma*beta - dt*sigma)*deno 
+    du13 = @. (-dt^2*sigma*x)*deno
     dpp[2,1,:] .*= du11
     dpp[2,2,:] .*= du12
     dpp[2,3,:] .*= du13
