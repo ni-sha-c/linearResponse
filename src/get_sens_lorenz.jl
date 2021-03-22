@@ -1,10 +1,10 @@
-include("../examples/baker.jl")
+include("../examples/lorenz.jl")
 using LinearAlgebra
 using JLD
 using SharedArrays
 using Distributed
 function sens(s,nSteps)
-	u = 2*pi*rand(2)
+	u = rand(3)
 	u_trj = step(u, s, nSteps)
 	x, y = view(u_trj,1,:), view(u_trj,2,:)
 	du_trj = dstep(u_trj, s)
@@ -98,7 +98,6 @@ function sens(s,nSteps)
 end
 function get_sens(s)
 	nSteps = 500000
-	# J = cos(4y)
 	n_exps = size(s)[2]
 	dJds = zeros(n_exps)
 	n_rep = 16
@@ -113,7 +112,7 @@ function get_sens(s)
 		dJds[k] = sum(dJds_proc)
 		@show dJds[k]
 	end
-	save("../data/sens/dJds_s2.jld", "s2",
+	save("../data/sens/lorenz/dJds.jld", "rho",
 	     s[2,:], "dJds", dJds)
 end
 	
