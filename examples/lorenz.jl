@@ -25,7 +25,6 @@ function next(u, s)
     u_next[3] = z + dt*(x*y - beta*z)
 	return u_next
 end
-
 function dstep(u::Array{Float64,2}, s::Array{Float64,1})
     sigma, rho, beta = s
     d, n = size(u)
