@@ -90,11 +90,11 @@ function sens(s,nSteps)
     	dJds_ust -= dot(J_shift,g_shift.*a_shift)/nJ
     end
    
-    @show dJds_st
+    @show sum(J)/nSteps
     return dJds_st + dJds_ust
 end
 function get_sens(s)
-    nSteps = 50
+    nSteps = 500000
     n_exps = size(s)[2]
     dJds = zeros(n_exps)
     n_rep = 16
