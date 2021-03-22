@@ -5,7 +5,11 @@ using SharedArrays
 using Distributed
 function sens(s,nSteps)
     d = 3
+    n_runup = 2000
     u = rand(d)
+    for i = 1:n_runup
+	u = next(u, s)
+    end
     u_trj = step(u, s, nSteps)
     x, y, z = view(u_trj,1,:), view(u_trj,2,:), view(u_trj,3,:)
    
