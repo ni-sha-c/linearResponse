@@ -44,7 +44,6 @@ function sens(s,nSteps)
     rho = s[2]
     # nSteps large number.
     for i = 1:nSteps-1
-	@show i
 	dui = du_trj[:,:,i] # for large systems, can't store Jacobian.
     	ppi = pp[:,i]
 	dppi = dpp[:,:,i]
@@ -90,13 +89,13 @@ function sens(s,nSteps)
     	dJds_ust -= dot(J_shift,g_shift.*a_shift)/nJ
     end
    
-    @show sum(J)/nSteps
     return dJds_st + dJds_ust
 end
 function get_sens(s)
     nSteps = 500000
     n_exps = size(s)[2]
     dJds = zeros(n_exps)
+    var_dJds = zeros(n_exps)
     n_rep = 16
     dJds_proc = SharedArray{Float64}(n_rep)
     for k=1:n_exps
@@ -107,9 +106,9 @@ function get_sens(s)
     	end
     	wait(t)
     	dJds[k] = sum(dJds_proc)
-    	@show dJds[k]
+        var_dJds[k] = n_rep*sum(dJds_proc.*dJds_proc) - (dJds[k])^2
     end
     save("../data/sens/lorenz/dJds.jld", "rho",
-         s[2,:], "dJds", dJds)
+         s[2,:], "dJds", dJds, "var_dJds", var_dJds)
 end
     
