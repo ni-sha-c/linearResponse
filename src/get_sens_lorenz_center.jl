@@ -12,7 +12,8 @@ function sens(s,nSteps)
     end
     u_trj = step(u, s, nSteps)
     x, y, z = view(u_trj,1,:), view(u_trj,2,:), view(u_trj,3,:)
-   
+    f_trj = vectorField(u_trj, s)
+
     du_trj = dstep(u_trj, s)
     ddu_trj = d2step(u_trj,s)
     vs = zeros(d)

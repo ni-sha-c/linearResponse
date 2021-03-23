@@ -77,8 +77,7 @@ function d2step(u::Array{Float64,1}, s::Array{Float64,1})
     ddu[:,8] = [-dt, 0., 0.]
     return ddu
 end
-function vectorField(u,s)
-    d, n = size(u)
+function vectorField(u::Array{Float64,2},s::Array{Float64,1})
     sigma, rho, beta = s
     x, y, z = view(u,1,:), view(u,2,:), view(u,3,:)
     return [sigma.*(y - x)  x.*(rho .- z) - y  x.*y - beta.*z]'
