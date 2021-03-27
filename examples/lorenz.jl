@@ -1,27 +1,29 @@
-dt = 0.005
+dt = 0.001
+function vectorField(u::Array{Float64,2},s::Array{Float64,1})
+    sigma, rho, beta = s
+    x, y, z = view(u,1,:), view(u,2,:), view(u,3,:)
+    return [sigma.*(y - x)  x.*(rho .- z) - y  x.*y - beta.*z]'
+end
+function vectorField(u::Array{Float64,1},s::Array{Float64,1})
+    sigma, rho, beta = s
+	x, y, z = u[1], u[2], u[3]
+    return [sigma.*(y - x)  x.*(rho .- z) - y  x.*y - beta.*z]'
+end
 function step(x0, s, n)
     x_trj = zeros(3, n+1)
     x_trj[:,1] = x0
-    sigma, rho, beta = s
     n = n+1
     for i = 2:n
-        x = x_trj[1,i-1]
-        y = x_trj[2,i-1]
-        z = x_trj[3,i-1]
-    
-        x_trj[1,i] = x + dt*(sigma*(y - x))
-        x_trj[2,i] = y + dt*(x*(rho - z) - y)
-        x_trj[3,i] = z + dt*(x*y - beta*z)
-    end 
+        x = x_trj[:,i-1]
+		k1 = dt*vectorField(x, s)
+		k2 = dt*vectorField(x .+ k1, s)
+    	@. x_trj[:,i] = x + (k1 + k2)/2 	
+	end 
     return x_trj
 end
 function next(u, s)
     x, y, z = u[1], u[2], u[3]
     u_next = similar(u)
-    sigma, rho, beta = s
-    u_next[1] = x + dt*(sigma*(y - x))
-    u_next[2] = y + dt*(x*(rho - z) - y)
-    u_next[3] = z + dt*(x*y - beta*z)
     return u_next
 end
 function dstep(u::Array{Float64,2}, s::Array{Float64,1})
@@ -76,11 +78,6 @@ function d2step(u::Array{Float64,1}, s::Array{Float64,1})
     ddu[:,6] = [dt, 0., 0.]
     ddu[:,8] = [-dt, 0., 0.]
     return ddu
-end
-function vectorField(u::Array{Float64,2},s::Array{Float64,1})
-    sigma, rho, beta = s
-    x, y, z = view(u,1,:), view(u,2,:), view(u,3,:)
-    return [sigma.*(y - x)  x.*(rho .- z) - y  x.*y - beta.*z]'
 end
 function pert(u::Array{Float64,2},s::Array{Float64,1})
     n = size(u)[2]
