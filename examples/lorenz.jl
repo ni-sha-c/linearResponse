@@ -22,9 +22,10 @@ function step(x0, s, n)
     return x_trj
 end
 function next(u, s)
-    x, y, z = u[1], u[2], u[3]
-    u_next = similar(u)
-    return u_next
+	k1 = dt*vectorField(u, s)
+	k2 = dt*vectorField(u .+ k1, s)
+	u_next = @. u + (k1 + k2)/2 
+	return u_next
 end
 function dstep(u::Array{Float64,2}, s::Array{Float64,1})
     sigma, rho, beta = s
