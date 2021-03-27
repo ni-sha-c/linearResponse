@@ -1,10 +1,10 @@
 dt = 0.001
-function vectorField(u::Array{Float64,2},s::Array{Float64,1})
+function flow(u::Array{Float64,2},s::Array{Float64,1})
     sigma, rho, beta = s
     x, y, z = view(u,1,:), view(u,2,:), view(u,3,:)
     return [sigma.*(y - x)  x.*(rho .- z) - y  x.*y - beta.*z]'
 end
-function vectorField(u::Array{Float64,1},s::Array{Float64,1})
+function flow(u::Array{Float64,1},s::Array{Float64,1})
     sigma, rho, beta = s
 	x, y, z = u[1], u[2], u[3]
     return [sigma.*(y - x)  x.*(rho .- z) - y  x.*y - beta.*z]'
@@ -27,57 +27,57 @@ function next(u, s)
 	u_next = @. u + (k1 + k2)/2 
 	return u_next
 end
-function dstep(u::Array{Float64,2}, s::Array{Float64,1})
+function dflow(u::Array{Float64,2}, s::Array{Float64,1})
     sigma, rho, beta = s
     d, n = size(u)
     x = view(u,1,:)
     y = view(u,2,:)
     z = view(u,3,:)
     du = zeros(n, d, d)
-    @. du[:,1,1] = 1.0 - dt*sigma
-    @. du[:,1,2] = dt*sigma
-    @. du[:,2,1] = dt*(rho - z) 
-    @. du[:,2,2] = 1.0 - dt
-    @. du[:,2,3] = -dt*x 
-    @. du[:,3,1] = dt*y
-    @. du[:,3,2] = dt*x
-    @. du[:,3,3] = 1.0 - dt*beta
+    @. du[:,1,1] = - sigma
+    @. du[:,1,2] = sigma
+    @. du[:,2,1] = (rho - z) 
+    @. du[:,2,2] = -1.0 
+    @. du[:,2,3] = -x 
+    @. du[:,3,1] = y
+    @. du[:,3,2] = x
+    @. du[:,3,3] = -beta
     return reshape([du[:,:,1]'; du[:,:,2]'; 
         			du[:,:,3]'], d, d, n)
 end
-function dstep(u::Array{Float64,1},s::Array{Float64,1})
+function dflow(u::Array{Float64,1},s::Array{Float64,1})
     du = zeros(3,3)
     x, y, z = u[1], u[2], u[3]
     sigma, rho, beta = s
-    du[1,1] = 1.0 - dt*sigma
-    du[1,2] = dt*sigma
-    du[2,1] = dt*(rho - z) 
-    du[2,2] = 1.0 - dt
-    du[2,3] = -dt*x 
-    du[3,1] = dt*y
-    du[3,2] = dt*x
-    du[3,3] = 1.0 - dt*beta
+    du[1,1] = -sigma
+    du[1,2] = sigma
+    du[2,1] = (rho - z) 
+    du[2,2] = -1.0
+    du[2,3] = -x 
+    du[3,1] = y
+    du[3,2] = x
+    du[3,3] = -beta
     return du
 end
-function d2step(u::Array{Float64,2}, s::Array{Float64,1})
+function d2flow(u::Array{Float64,2}, s::Array{Float64,1})
     n = size(u)[2]
     ddu = zeros(3,9,n)
     for i = 1:n
     	x, y, z = u[1,i], u[2,i], u[3,i]
-    	ddu[:,2,i] = [0., 0., -dt]
-    	ddu[:,3,i] = [0., dt, 0.]
-    	ddu[:,6,i] = [dt, 0., 0.]
-    	ddu[:,8,i] = [-dt, 0., 0.]
+    	ddu[:,2,i] = [0., 0., -1]
+    	ddu[:,3,i] = [0., 1, 0.]
+    	ddu[:,6,i] = [1, 0., 0.]
+    	ddu[:,8,i] = [-1, 0., 0.]
     end
     return ddu
 end
-function d2step(u::Array{Float64,1}, s::Array{Float64,1})
+function d2flow(u::Array{Float64,1}, s::Array{Float64,1})
     ddu = zeros(3,9)
     x, y, z = u[1], u[2], u[3]
-    ddu[:,2] = [0., 0., -dt]
-    ddu[:,3] = [0., dt, 0.]
-    ddu[:,6] = [dt, 0., 0.]
-    ddu[:,8] = [-dt, 0., 0.]
+    ddu[:,2] = [0., 0., -1]
+    ddu[:,3] = [0., 1, 0.]
+    ddu[:,6] = [1, 0., 0.]
+    ddu[:,8] = [-1, 0., 0.]
     return ddu
 end
 function pert(u::Array{Float64,2},s::Array{Float64,1})
