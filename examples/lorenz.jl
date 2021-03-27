@@ -1,3 +1,4 @@
+using LinearAlgebra
 dt = 0.001
 function flow(u::Array{Float64,2},s::Array{Float64,1})
     sigma, rho, beta = s
@@ -59,6 +60,31 @@ function dflow(u::Array{Float64,1},s::Array{Float64,1})
     du[3,3] = -beta
     return du
 end
+function dstep(u::Array{Float64,2}, s::Array{Float64,1})
+	d, n = size(u)
+	du = zeros(n, d, d)
+	for i = 2:n
+		ui = u[:,i]
+		k1 = flow(ui, s)
+		dk1 = dt*dflow(ui, s)
+		dk2 = dt*dflow(ui .+ k1, s)
+		dui = 1.0*I(d)
+		dui .+= 0.5*(dk1 + dk2*(1.0*I(d) + dk1))
+		du[i,:,:] = dui
+	end
+	return du
+end
+function dstep(u::Array{Float64,2}, s::Array{Float64,1})
+	d = size(u)[1]
+	du = zeros(d, d)
+	k1 = flow(u, s)
+	dk1 = dt*dflow(u, s)
+	dk2 = dt*dflow(u .+ k1, s)
+	du = 1.0*I(d)
+	du .+= 0.5*(dk1 + dk2*(1.0*I(d) + dk1))
+	return du
+end
+
 function d2flow(u::Array{Float64,2}, s::Array{Float64,1})
     n = size(u)[2]
     ddu = zeros(3,9,n)
