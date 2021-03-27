@@ -1,5 +1,5 @@
 using LinearAlgebra
-dt = 0.001
+dt = 0.002
 function flow(u::Array{Float64,2},s::Array{Float64,1})
     sigma, rho, beta = s
     x, y, z = view(u,1,:), view(u,2,:), view(u,3,:)
@@ -10,21 +10,21 @@ function flow(u::Array{Float64,1},s::Array{Float64,1})
 	x, y, z = u[1], u[2], u[3]
     return [sigma.*(y - x)  x.*(rho .- z) - y  x.*y - beta.*z]'
 end
-function step(x0, s, n)
-    x_trj = zeros(3, n+1)
-    x_trj[:,1] = x0
+function step(u0, s, n)
+    u_trj = zeros(3, n+1)
+    u_trj[:,1] = u0
     n = n+1
     for i = 2:n
-        x = x_trj[:,i-1]
-		k1 = dt*vectorField(x, s)
-		k2 = dt*vectorField(x .+ k1, s)
-    	@. x_trj[:,i] = x + (k1 + k2)/2 	
+        u = u_trj[:,i-1]
+		k1 = dt*flow(u, s)
+		k2 = dt*flow(u .+ k1, s)
+		u_trj[:,i] = @. u + (k1 + k2)/2 	
 	end 
-    return x_trj
+    return u_trj
 end
 function next(u, s)
-	k1 = dt*vectorField(u, s)
-	k2 = dt*vectorField(u .+ k1, s)
+	k1 = dt*flow(u, s)
+	k2 = dt*flow(u .+ k1, s)
 	u_next = @. u + (k1 + k2)/2 
 	return u_next
 end
