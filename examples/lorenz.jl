@@ -88,7 +88,6 @@ function d2flow(u::Array{Float64,2}, s::Array{Float64,1})
     n = size(u)[2]
     ddu = zeros(3,9,n)
     for i = 1:n
-    	x, y, z = u[1,i], u[2,i], u[3,i]
     	ddu[:,2,i] = [0., 0., -1]
     	ddu[:,3,i] = [0., 1, 0.]
     	ddu[:,6,i] = [1, 0., 0.]
@@ -98,12 +97,15 @@ function d2flow(u::Array{Float64,2}, s::Array{Float64,1})
 end
 function d2flow(u::Array{Float64,1}, s::Array{Float64,1})
     ddu = zeros(3,9)
-    x, y, z = u[1], u[2], u[3]
     ddu[:,2] = [0., 0., -1]
     ddu[:,3] = [0., 1, 0.]
     ddu[:,6] = [1, 0., 0.]
     ddu[:,8] = [-1, 0., 0.]
     return ddu
+end
+function d2step(u::Array{Float64,1}, s::Array{Float64,1})
+	ddu = zeros(3, 9)
+	x, y, z = u[1], u[2], u[3]
 end
 function pert(u::Array{Float64,2},s::Array{Float64,1})
     n = size(u)[2]
