@@ -1,4 +1,5 @@
 include("../examples/lorenz.jl")
+using Test
 using PyPlot
 function test_attractor()
 	s = [10., 28., 8.0/3]
@@ -22,5 +23,31 @@ function test_attractor()
 	ax.set_xlabel("x",fontsize=36)
 	ax.set_ylabel("z",fontsize=36)
 	ax.tick_params(axis="both",labelsize=36)	
+end
+function test_dstep()
+	eps = 1.e-8
+	s = [10., 28., 8.0/3]
+	u = rand(3)
+	u1px = u + eps*[1,0,0]
+	u1mx = u - eps*[1,0,0]
+	u1py = u + eps*[0,1,0]
+	u1my = u - eps*[0,1,0]
+	u1pz = u + eps*[0,0,1]
+	u1mz = u - eps*[0,0,1]
 
+	du_dx_fd = (next(u1px,s) - next(u1mx,s))/(2*eps) 
+	du_dy_fd = (next(u1py,s) - next(u1my,s))/(2*eps) 
+	du_dz_fd = (next(u1pz,s) - next(u1mz,s))/(2*eps)
+
+	du = dstep(u, s)
+	du_dx = du[:,1]
+	du_dy = du[:,2]
+	du_dz = du[:,3]
+
+	@show abs.(du_dx_fd .- du_dx)
+	@show abs.(du_dy_fd .- du_dy)
+	@show abs.(du_dz_fd .- du_dz)
+	@test du_dx_fd ≈ du_dx atol=1.e-8
+	@test du_dy_fd ≈ du_dy atol=1.e-8
+	@test du_dz_fd ≈ du_dz atol=1.e-8
 end
