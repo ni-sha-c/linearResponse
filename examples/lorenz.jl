@@ -86,26 +86,30 @@ end
 
 function d2flow(u::Array{Float64,2}, s::Array{Float64,1})
     n = size(u)[2]
-    ddu = zeros(3,9,n)
+    ddu = zeros(3,3,3,n)
     for i = 1:n
-    	ddu[:,2,i] = [0., 0., -1]
-    	ddu[:,3,i] = [0., 1, 0.]
-    	ddu[:,6,i] = [1, 0., 0.]
-    	ddu[:,8,i] = [-1, 0., 0.]
+    	ddu[2,3,1,i] = -1.0
+		ddu[3,2,1,i] = 1.0
+    	ddu[3,1,2,i] = 1.0
+    	ddu[2,1,3,i] = -1.0
     end
     return ddu
 end
 function d2flow(u::Array{Float64,1}, s::Array{Float64,1})
-    ddu = zeros(3,9)
-    ddu[:,2] = [0., 0., -1]
-    ddu[:,3] = [0., 1, 0.]
-    ddu[:,6] = [1, 0., 0.]
-    ddu[:,8] = [-1, 0., 0.]
+    ddu = zeros(3,3,3)
+    ddu[2,3,1] = -1.0
+	ddu[3,2,1] = 1.0
+    ddu[3,1,2] = 1.0
+    ddu[2,1,3] = -1.0
     return ddu
 end
 function d2step(u::Array{Float64,1}, s::Array{Float64,1})
-	ddu = zeros(3, 9)
-	x, y, z = u[1], u[2], u[3]
+	ddu = zeros(3, 3, 3)
+	dk1 = dt*dflow(u,s)
+	d2 = dt*d2flow(u, s)
+	for i = 1:3
+		ddu[:,:,i] = 0.5*(d2k1 .+ d2*(1.0*I(3) .+ dk1) .+ dk2*d2k1)
+	end
 end
 function pert(u::Array{Float64,2},s::Array{Float64,1})
     n = size(u)[2]
