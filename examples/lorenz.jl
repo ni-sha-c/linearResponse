@@ -62,15 +62,15 @@ function dflow(u::Array{Float64,1},s::Array{Float64,1})
 end
 function dstep(u::Array{Float64,2}, s::Array{Float64,1})
 	d, n = size(u)
-	du = zeros(n, d, d)
-	for i = 2:n
+	du = zeros(d, d, n)
+	dui = zeros(d,d)
+	for i = 1:n
 		ui = u[:,i]
-		k1 = flow(ui, s)
+		k1 = dt*flow(ui, s)
 		dk1 = dt*dflow(ui, s)
 		dk2 = dt*dflow(ui .+ k1, s)
-		dui = 1.0*I(d)
-		dui .+= 0.5*(dk1 .+ dk2*(1.0*I(d) .+ dk1))
-		du[i,:,:] = dui
+		dui .= 1.0*I(d) .+ 0.5*(dk1 .+ dk2*(1.0*I(d) .+ dk1))
+		du[:,:,i] .= dui
 	end
 	return du
 end
