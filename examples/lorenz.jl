@@ -108,8 +108,10 @@ function d2step(u::Array{Float64,1}, s::Array{Float64,1})
 	dk1 = dt*dflow(u,s)
 	d2 = dt*d2flow(u, s)
 	for i = 1:3
-		ddu[:,:,i] = 0.5*(d2k1 .+ d2*(1.0*I(3) .+ dk1) .+ dk2*d2k1)
+			ddu[:,:,i] = 0.5*(d2 .+ d2[:,:,i]*(1.0*I(3) .+ 
+						dk1) .+ dk2*d2[:,:,i])
 	end
+	return ddu
 end
 function pert(u::Array{Float64,2},s::Array{Float64,1})
     n = size(u)[2]
