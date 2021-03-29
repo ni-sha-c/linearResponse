@@ -105,12 +105,21 @@ function d2flow(u::Array{Float64,1}, s::Array{Float64,1})
 end
 function d2step(u::Array{Float64,1}, s::Array{Float64,1})
 	ddu = zeros(3, 3, 3)
+	k1 = dt*flow(u, s)
 	dk1 = dt*dflow(u,s)
+	dk2 = dt*dflow(u .+ k1, s)
 	d2 = dt*d2flow(u, s)
-	for i = 1:3
-			ddu[:,:,i] = 0.5*(d2 .+ d2[:,:,i]*(1.0*I(3) .+ dk1)*
-					(1.0*I(3) .+ dk1) .+ dk2*d2[:,:,i])
+	d2p = permutedims(d2,[1, 3, 2]) 
+	A = zeros(3,3,3)
+	for j = 1:3
+		A[:,:,j] .= d2p[:,:,j]*(1.0*I(3) .+ dk1) 
 	end
+	A = permutedims(A, [1,3,2])
+	for i = 1:3
+		ddu[:,:,i] = 0.5*(d2[:,:,i] .+ dk2*d2[:,:,i] .+ A[:,:,i]*
+							  (1.0*I(3) .+ dk1))	
+	end
+	
 	return ddu
 end
 function pert(u::Array{Float64,2},s::Array{Float64,1})
