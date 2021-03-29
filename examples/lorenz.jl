@@ -103,6 +103,28 @@ function d2flow(u::Array{Float64,1}, s::Array{Float64,1})
     ddu[2,1,3] = -1.0
     return ddu
 end
+function d2step(u::Array{Float64,2}, s::Array{Float64,1})
+	d, n = size(u)
+	ddu = zeros(d, d, d, n)
+	k1 = dt*flow(u, s)
+	dk1 = dt*dflow(u,s)
+	dk2 = dt*dflow(u .+ k1, s)
+	d2 = dt*d2flow(u, s)
+	d2p = permutedims(d2,[1, 3, 2, 4]) 
+	A = zeros(d,d,d)
+	for k = 1:n
+		for j = 1:d
+			A[:,:,j] .= d2p[:,:,j,k]*(1.0*I(d) .+ dk1[:,:,k]) 
+		end
+		A = permutedims(A, [1,3,2])
+		for i = 1:d
+				ddu[:,:,i,k] = 0.5*(d2[:,:,i,k] .+ 
+						dk2[:,:,k]*d2[:,:,i,k] .+ A[:,:,i]*
+						(1.0*I(d) .+ dk1[:,:,k]))	
+		end
+	end
+	return ddu
+end
 function d2step(u::Array{Float64,1}, s::Array{Float64,1})
 	ddu = zeros(3, 3, 3)
 	k1 = dt*flow(u, s)
