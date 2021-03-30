@@ -153,3 +153,29 @@ function test_pert_arr()
 	@show pp_fd, pp
 	@test pp_fd ≈ pp atol=1.e-8
 end
+function test_dpert()
+	eps = 1.e-6
+	s = [10., 28., 8.0/3]
+	u = rand(3)
+	u1px = u .+ eps*[1,0,0]
+	u1mx = u .- eps*[1,0,0]
+	u1py = u .+ eps*[0,1,0]
+	u1my = u .- eps*[0,1,0]
+	u1pz = u .+ eps*[0,0,1]
+	u1mz = u .- eps*[0,0,1]
+
+	dpert_dx_fd = (pert(u1px,s) - pert(u1mx,s))/(2*eps) 
+	dpert_dy_fd = (pert(u1py,s) - pert(u1my,s))/(2*eps) 
+	dpert_dz_fd = (pert(u1pz,s) - pert(u1mz,s))/(2*eps)
+	dpp = dpert(u, s)
+
+	@show dpp[:,1] .- ddu_dx_fd
+	@show dpp[:,2] .- ddu_dy_fd
+	@show dpp[:,3] .- ddu_dz_fd
+
+	@test dpp[:,1] ≈ dpert_dx_fd atol=1.e-8
+	@test dpp[:,2] ≈ dpert_dy_fd atol=1.e-8
+	@test dpp[:,3] ≈ dpert_dz_fd atol=1.e-8
+
+
+end
