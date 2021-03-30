@@ -14,7 +14,8 @@ function sens(s,nSteps)
     x, y, z = view(u_trj,1,:), view(u_trj,2,:), view(u_trj,3,:)
     du_trj = dstep(u_trj, s)
     ddu_trj = d2step(u_trj,s)
-    vs = zeros(d)
+	f_trj = flow(u_trj,s)
+	vs = zeros(d)
     q = rand(d)
     q /= norm(q)
 
@@ -36,18 +37,22 @@ function sens(s,nSteps)
     # Xu = a q
     Xu = zeros(d, nSteps)
     a = zeros(nSteps)
+    c = zeros(nSteps)
+    beta = zeros(nSteps)
     Da = zeros(nSteps)
     Dq = zeros(d)
     Dvs = zeros(d)
     Dvs1 = zeros(d)
     rho = s[2]
-	#=
+	
     # nSteps large number.
     for i = 1:nSteps-1
         dui = du_trj[:,:,i] # for large systems, can't store Jacobian.
         ppi = pp[:,i]
         dppi = dpp[:,:,i]
         xi, yi, zi = x[i], y[i], z[i]
+		beta[i+1] = norm(f_trj[:,i+1])
+		f1 = f_trj[:,i+1]/beta[i+1]
 
         q1 .= dui*q
         alpha = norm(q1)
@@ -60,8 +65,11 @@ function sens(s,nSteps)
 		c[i+1] = dot(vs1, f1)
         vs1 .-= c[i+1]*f1
         
-		d2q = reshape([dot(ddu_trj[:,j,i],
-            		q) for j=1:d*d],d,d)
+		d2q = zeros(d,d)
+		for j = 1:d
+			d2q[:,j] .= ddu_trj[:,:,j,i]*q
+		end
+         
         Dq = d2q*q/alpha2 + dui*Dq/alpha2
         dalphadx = dot(alpha2*Dq, q1)
         Dq .= Dq .- dot(Dq,q1)*q1
@@ -92,7 +100,7 @@ function sens(s,nSteps)
     end
    
     return dJds_st + dJds_ust
-	=#
+	
 end
 function get_sens(s)
     nSteps = 500000
