@@ -146,10 +146,18 @@ function d2step(u::Array{Float64,1}, s::Array{Float64,1})
 end
 function pert(u::Array{Float64,2},s::Array{Float64,1})
     n = size(u)[2]
-    x = view(u,1,:)
-    pp = zeros(3, n)
-    @. pp[2,:] = dt*x
-    return pp
+    dsflow(x) = [0., x, 0.]
+	pp = zeros(3, n)
+    for i = 1:n
+		ui = u[:,i]
+		k1 = dt*flow(ui, s)
+		dk2 = dt*dflow(ui .+ k1,s)
+		dsk1 = dt*dsflow(ui[1])
+		dsk2 = dt*dsflow(ui[1] .+ k1[1]) .+ 
+			   dk2*dsk1
+		pp[:,i] = 0.5*(dsk1 + dsk2)
+	end
+	return pp
 end
 function pert(u::Array{Float64,1},s::Array{Float64,1})
 	dsflow(x) = [0., x, 0.]
