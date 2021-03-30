@@ -162,6 +162,7 @@ end
 function pert(u::Array{Float64,1},s::Array{Float64,1})
 	dsflow(x) = [0., x, 0.]
 	k1 = dt*flow(u, s)
+
 	dk2 = dt*dflow(u .+ k1,s)
 	dsk1 = dt*dsflow(u[1])
 	dsk2 = dt*dsflow(u[1] .+ k1[1]) .+ 
@@ -174,14 +175,16 @@ function dpert(u::Array{Float64,1},s::Array{Float64,1})
 	ddsflow = zeros(3,3)
 	ddsflow[2,1] = 1.0
 	
+	k1 = dt*flow(u, s)
+	dk1 = dt*dflow(u,s)
+	
 	dk2 = dt*dflow(u .+ k1,s)
 	ddk2 = dt*d2flow(u .+ k1, s)
-	dk11 = zeros(3,3)
-	dk11[2,:] = dt*dflow(u, s)[1,:] 
-	ddsk1 = dt*ddsflow
 	
-
+	dsflow(x) = [0., x, 0.]
 	dsk1 = dt*dsflow(u[1])
+	ddsk1 = dt*ddsflow
+		
 	d2 = dt*d2flow(u, s)
     d2p = permutedims(d2,[1, 3, 2]) 
     A = zeros(3,3,3)
@@ -190,12 +193,12 @@ function dpert(u::Array{Float64,1},s::Array{Float64,1})
     end
     A = permutedims(A, [1,3,2])
 
-	ddsk2 = dt*ddsflow .+ dt*dk11 .+
+	ddsk2 = dt*ddsflow*(1.0*I(3) .+ dk1) .+
 			dk2*ddsk1 
 	for j = 1:3
-		ddsk2 .+= A[:,:,j]*dsk1
+		ddsk2[:,j] .+= A[:,:,j]*dsk1
 	end
-	dpp .= 0.5*(ddsk1 + ddsk1)			
+	dpp .= 0.5*(ddsk1 + ddsk2)			
 	return dpp
 end
 function dpert(u::Array{Float64,2},s::Array{Float64,1})

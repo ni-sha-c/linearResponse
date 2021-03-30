@@ -169,9 +169,9 @@ function test_dpert()
 	dpert_dz_fd = (pert(u1pz,s) - pert(u1mz,s))/(2*eps)
 	dpp = dpert(u, s)
 
-	@show dpp[:,1] .- ddu_dx_fd
-	@show dpp[:,2] .- ddu_dy_fd
-	@show dpp[:,3] .- ddu_dz_fd
+	@show dpp[:,1] .- dpert_dx_fd
+	@show dpp[:,2] .- dpert_dy_fd
+	@show dpp[:,3] .- dpert_dz_fd
 
 	@test dpp[:,1] ≈ dpert_dx_fd atol=1.e-8
 	@test dpp[:,2] ≈ dpert_dy_fd atol=1.e-8
