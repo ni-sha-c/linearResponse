@@ -7,7 +7,7 @@ function flow(u::Array{Float64,2},s::Array{Float64,1})
 end
 function flow(u::Array{Float64,1},s::Array{Float64,1})
     sigma, rho, beta = s
-	x, y, z = u[1], u[2], u[3]
+    x, y, z = u[1], u[2], u[3]
     return [sigma*(y - x), x*(rho - z) - y, x*y - beta*z]
 end
 function step(u0, s, n)
@@ -16,17 +16,17 @@ function step(u0, s, n)
     n = n+1
     for i = 2:n
         u = u_trj[:,i-1]
-		k1 = dt*flow(u, s)
-		k2 = dt*flow(u .+ k1, s)
-		u_trj[:,i] = @. u + (k1 + k2)/2 	
-	end 
+    	k1 = dt*flow(u, s)
+    	k2 = dt*flow(u .+ k1, s)
+    	u_trj[:,i] = @. u + (k1 + k2)/2 	
+    end 
     return u_trj
 end
 function next(u, s)
-	k1 = dt*flow(u, s)
-	k2 = dt*flow(u .+ k1, s)
-	u_next = @. u + (k1 + k2)/2 
-	return u_next
+    k1 = dt*flow(u, s)
+    k2 = dt*flow(u .+ k1, s)
+    u_next = @. u + (k1 + k2)/2 
+    return u_next
 end
 function dflow(u::Array{Float64,2}, s::Array{Float64,1})
     sigma, rho, beta = s
@@ -44,7 +44,7 @@ function dflow(u::Array{Float64,2}, s::Array{Float64,1})
     @. du[:,3,2] = x
     @. du[:,3,3] = -beta
     return reshape([du[:,:,1]'; du[:,:,2]'; 
-        			du[:,:,3]'], d, d, n)
+            		du[:,:,3]'], d, d, n)
 end
 function dflow(u::Array{Float64,1},s::Array{Float64,1})
     du = zeros(3,3)
@@ -61,88 +61,88 @@ function dflow(u::Array{Float64,1},s::Array{Float64,1})
     return du
 end
 function dstep(u::Array{Float64,2}, s::Array{Float64,1})
-	d, n = size(u)
-	du = zeros(d, d, n)
-	dui = zeros(d,d)
-	for i = 1:n
-		ui = u[:,i]
-		k1 = dt*flow(ui, s)
-		dk1 = dt*dflow(ui, s)
-		dk2 = dt*dflow(ui .+ k1, s)
-		dui .= 1.0*I(d) .+ 0.5*(dk1 .+ dk2*(1.0*I(d) .+ dk1))
-		du[:,:,i] .= dui
-	end
-	return du
+    d, n = size(u)
+    du = zeros(d, d, n)
+    dui = zeros(d,d)
+    for i = 1:n
+    	ui = u[:,i]
+    	k1 = dt*flow(ui, s)
+    	dk1 = dt*dflow(ui, s)
+    	dk2 = dt*dflow(ui .+ k1, s)
+    	dui .= 1.0*I(d) .+ 0.5*(dk1 .+ dk2*(1.0*I(d) .+ dk1))
+    	du[:,:,i] .= dui
+    end
+    return du
 end
 function dstep(u::Array{Float64,1}, s::Array{Float64,1})
-	d = 3
-	du = zeros(d, d)
-	k1 = dt*flow(u, s)
-	dk1 = dt*dflow(u, s)
-	dk2 = dt*dflow(u .+ k1, s)
-	du = 1.0*I(d) .+ 0.5*(dk1 .+ dk2*(1.0*I(d) .+ dk1))
-	return du
+    d = 3
+    du = zeros(d, d)
+    k1 = dt*flow(u, s)
+    dk1 = dt*dflow(u, s)
+    dk2 = dt*dflow(u .+ k1, s)
+    du = 1.0*I(d) .+ 0.5*(dk1 .+ dk2*(1.0*I(d) .+ dk1))
+    return du
 end
 
 function d2flow(u::Array{Float64,2}, s::Array{Float64,1})
     n = size(u)[2]
     ddu = zeros(3,3,3,n)
     for i = 1:n
-    	ddu[2,3,1,i] = -1.0
-		ddu[3,2,1,i] = 1.0
-    	ddu[3,1,2,i] = 1.0
-    	ddu[2,1,3,i] = -1.0
+        ddu[2,3,1,i] = -1.0
+    	ddu[3,2,1,i] = 1.0
+        ddu[3,1,2,i] = 1.0
+        ddu[2,1,3,i] = -1.0
     end
     return ddu
 end
 function d2flow(u::Array{Float64,1}, s::Array{Float64,1})
     ddu = zeros(3,3,3)
     ddu[2,3,1] = -1.0
-	ddu[3,2,1] = 1.0
+    ddu[3,2,1] = 1.0
     ddu[3,1,2] = 1.0
     ddu[2,1,3] = -1.0
     return ddu
 end
 function d2step(u::Array{Float64,2}, s::Array{Float64,1})
-	d, n = size(u)
-	ddu = zeros(d, d, d, n)
-	k1 = dt*flow(u, s)
-	dk1 = dt*dflow(u,s)
-	dk2 = dt*dflow(u .+ k1, s)
-	d2 = dt*d2flow(u, s)
-	d2p = permutedims(d2,[1, 3, 2, 4]) 
-	A = zeros(d,d,d)
-	for k = 1:n
-		for j = 1:d
-			A[:,:,j] .= d2p[:,:,j,k]*(1.0*I(d) .+ dk1[:,:,k]) 
-		end
-		A = permutedims(A, [1,3,2])
-		for i = 1:d
-				ddu[:,:,i,k] = 0.5*(d2[:,:,i,k] .+ 
-						dk2[:,:,k]*d2[:,:,i,k] .+ A[:,:,i]*
-						(1.0*I(d) .+ dk1[:,:,k]))	
-		end
-	end
-	return ddu
+    d, n = size(u)
+    ddu = zeros(d, d, d, n)
+    k1 = dt*flow(u, s)
+    dk1 = dt*dflow(u,s)
+    dk2 = dt*dflow(u .+ k1, s)
+    d2 = dt*d2flow(u, s)
+    d2p = permutedims(d2,[1, 3, 2, 4]) 
+    A = zeros(d,d,d)
+    for k = 1:n
+    	for j = 1:d
+    		A[:,:,j] .= d2p[:,:,j,k]*(1.0*I(d) .+ dk1[:,:,k]) 
+    	end
+    	A = permutedims(A, [1,3,2])
+    	for i = 1:d
+    			ddu[:,:,i,k] = 0.5*(d2[:,:,i,k] .+ 
+    					dk2[:,:,k]*d2[:,:,i,k] .+ A[:,:,i]*
+    					(1.0*I(d) .+ dk1[:,:,k]))	
+    	end
+    end
+    return ddu
 end
 function d2step(u::Array{Float64,1}, s::Array{Float64,1})
-	ddu = zeros(3, 3, 3)
-	k1 = dt*flow(u, s)
-	dk1 = dt*dflow(u,s)
-	dk2 = dt*dflow(u .+ k1, s)
-	d2 = dt*d2flow(u, s)
-	d2p = permutedims(d2,[1, 3, 2]) 
-	A = zeros(3,3,3)
-	for j = 1:3
-		A[:,:,j] .= d2p[:,:,j]*(1.0*I(3) .+ dk1) 
-	end
-	A = permutedims(A, [1,3,2])
-	for i = 1:3
-		ddu[:,:,i] = 0.5*(d2[:,:,i] .+ dk2*d2[:,:,i] .+ A[:,:,i]*
-							  (1.0*I(3) .+ dk1))	
-	end
-	
-	return ddu
+    ddu = zeros(3, 3, 3)
+    k1 = dt*flow(u, s)
+    dk1 = dt*dflow(u,s)
+    dk2 = dt*dflow(u .+ k1, s)
+    d2 = dt*d2flow(u, s)
+    d2p = permutedims(d2,[1, 3, 2]) 
+    A = zeros(3,3,3)
+    for j = 1:3
+    	A[:,:,j] .= d2p[:,:,j]*(1.0*I(3) .+ dk1) 
+    end
+    A = permutedims(A, [1,3,2])
+    for i = 1:3
+    	ddu[:,:,i] = 0.5*(d2[:,:,i] .+ dk2*d2[:,:,i] .+ A[:,:,i]*
+    						  (1.0*I(3) .+ dk1))	
+    end
+    
+    return ddu
 end
 function pert(u::Array{Float64,2},s::Array{Float64,1})
     n = size(u)[2]
@@ -152,20 +152,18 @@ function pert(u::Array{Float64,2},s::Array{Float64,1})
     return pp
 end
 function pert(u::Array{Float64,1},s::Array{Float64,1})
-    return [0, dt*u[1], 0]
+	dsflow(x) = [0., x, 0.]
+	k1 = dt*flow(u, s)
+	dk2 = dt*dflow(u .+ k1,s)
+	dsk1 = dt*dsflow(u[1])
+	dsk2 = dt*(dsflow(u[1] .+ k1[1]) .+ 
+			   dk2*dsk1)
+	pp = 0.5*(dsk1 + dsk2)
+	return pp
 end
 function dpert(u::Array{Float64,1},s::Array{Float64,1})
-    x, y, z = u[1], u[2], u[3]
-    sigma, rho, beta = s
     dpp = zeros(3,3)
     dpp[2,:] .= dt
-    deno  = 1/(dt^3*sigma*(beta*(rho - z - 1) + x*(y - x)) + dt^2*(sigma*(-rho + beta + z + 1) + beta + x^2) - dt*(sigma + beta + 1) + 1)
-    du11 = (dt^2*beta + dt^2*x^2 - dt*beta - dt + 1)*deno
-    du12 = (dt^2*sigma*beta - dt*sigma)*deno 
-    du13 = (-dt^2*sigma*x)*deno
-    dpp[2,1] *= du11
-    dpp[2,2] *= du12
-    dpp[2,3] *= du13
    
     return dpp
 end
