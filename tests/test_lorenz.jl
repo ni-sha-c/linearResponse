@@ -101,3 +101,28 @@ function test_d2step()
 	@test ddu[:,:,3] ≈ ddu_dz_fd atol=1.e-8
 
 end
+function test_d2step_arr()
+	eps = 1.e-6
+	s = [10., 28., 8.0/3]
+	u = rand(3,1)
+	u1px = u[:,1] .+ eps*[1,0,0]
+	u1mx = u[:,1] .- eps*[1,0,0]
+	u1py = u[:,1] .+ eps*[0,1,0]
+	u1my = u[:,1] .- eps*[0,1,0]
+	u1pz = u[:,1] .+ eps*[0,0,1]
+	u1mz = u[:,1] .- eps*[0,0,1]
+
+	ddu_dx_fd = (dstep(u1px,s) - dstep(u1mx,s))/(2*eps) 
+	ddu_dy_fd = (dstep(u1py,s) - dstep(u1my,s))/(2*eps) 
+	ddu_dz_fd = (dstep(u1pz,s) - dstep(u1mz,s))/(2*eps)
+
+	ddu = d2step(u, s)
+	@show ddu[:,:,1,1] .- ddu_dx_fd
+	@show ddu[:,:,2,1] .- ddu_dy_fd
+	@show ddu[:,:,3,1] .- ddu_dz_fd
+
+	@test ddu[:,:,1,1] ≈ ddu_dx_fd atol=1.e-8
+	@test ddu[:,:,2,1] ≈ ddu_dy_fd atol=1.e-8
+	@test ddu[:,:,3,1] ≈ ddu_dz_fd atol=1.e-8
+
+end
