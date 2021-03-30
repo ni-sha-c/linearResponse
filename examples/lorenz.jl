@@ -244,7 +244,7 @@ function dpert(u::Array{Float64, 2}, s::Array{Float64,1})
 	d, n = size(u)
 	dpp = zeros(3,3,n)
 	for i = 1:n
-		dpp[:,:,i] .= du'\dpp_next'
+		dpp[:,:,i] .= du[:,:,i]'\dpp_next[:,:,i]'
 		dpp[:,:,i] .= dpp[:,:,i]'
 	end
 	return dpp

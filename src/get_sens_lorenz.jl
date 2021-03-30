@@ -41,6 +41,7 @@ function sens(s,nSteps)
     Dvs = zeros(d)
     Dvs1 = zeros(d)
     rho = s[2]
+	#=
     # nSteps large number.
     for i = 1:nSteps-1
         dui = du_trj[:,:,i] # for large systems, can't store Jacobian.
@@ -91,6 +92,7 @@ function sens(s,nSteps)
     end
    
     return dJds_st + dJds_ust
+	=#
 end
 function get_sens(s)
     nSteps = 500000
