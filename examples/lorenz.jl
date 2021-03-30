@@ -156,8 +156,8 @@ function pert(u::Array{Float64,1},s::Array{Float64,1})
 	k1 = dt*flow(u, s)
 	dk2 = dt*dflow(u .+ k1,s)
 	dsk1 = dt*dsflow(u[1])
-	dsk2 = dt*(dsflow(u[1] .+ k1[1]) .+ 
-			   dk2*dsk1)
+	dsk2 = dt*dsflow(u[1] .+ k1[1]) .+ 
+			   dk2*dsk1
 	pp = 0.5*(dsk1 + dsk2)
 	return pp
 end
