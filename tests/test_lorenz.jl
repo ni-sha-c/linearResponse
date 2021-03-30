@@ -126,3 +126,16 @@ function test_d2step_arr()
 	@test ddu[:,:,3,1] ≈ ddu_dz_fd atol=1.e-8
 
 end
+function test_pert()
+	eps = 1.e-6
+	s = [10., 28., 8.0/3]
+	u = rand(3)
+	sp = s .+ [0., eps, 0.]
+	sm = s .- [0., eps, 0.]
+	
+	pp_fd = (next(u, sp) - next(u, sm))/(2*eps)
+	pp = pert(u, s)
+
+	@show pp_fd, pp
+	@test pp_fd ≈ pp atol=1.e-8
+end
