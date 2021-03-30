@@ -170,6 +170,37 @@ function pert(u::Array{Float64,1},s::Array{Float64,1})
 	pp = 0.5*(dsk1 + dsk2)
 	return pp
 end
+function dpert_next(u_arr::Array{Float64,2},s::Array{Float64,1})
+	d, n = size(u_arr) 
+	dpp = zeros(3,3,n)
+	ddsflow = zeros(3,3)
+	ddsflow[2,1] = 1.0
+	dsflow(x) = [0., x, 0.]
+	for j = 1:n
+		u = u_arr[:,j]
+		k1 = dt*flow(u, s)
+		dk1 = dt*dflow(u,s)
+		dk2 = dt*dflow(u .+ k1,s)
+		ddk2 = dt*d2flow(u .+ k1, s)
+		dsk1 = dt*dsflow(u[1])
+		ddsk1 = dt*ddsflow
+		d2 = dt*d2flow(u, s)
+    	d2p = permutedims(d2,[1, 3, 2]) 
+    	A = zeros(3,3,3)
+    	for j = 1:3
+    		A[:,:,j] .= d2p[:,:,j]*(1.0*I(3) .+ dk1) 
+    	end
+    	A = permutedims(A, [1,3,2])
+		ddsk2 = dt*ddsflow*(1.0*I(3) .+ dk1) .+
+			dk2*ddsk1 
+		for i = 1:3
+			ddsk2[:,i] .+= A[:,:,i]*dsk1
+		end
+		dpp[:,:,j] .= 0.5*(ddsk1 + ddsk2)			
+
+  	end
+	return dpp
+end
 function dpert_next(u::Array{Float64,1},s::Array{Float64,1})
     dpp = zeros(3,3)
 	ddsflow = zeros(3,3)
@@ -201,35 +232,21 @@ function dpert_next(u::Array{Float64,1},s::Array{Float64,1})
 	dpp .= 0.5*(ddsk1 + ddsk2)			
 	return dpp
 end
-function dpert_next(u_arr::Array{Float64,2},s::Array{Float64,1})
-	d, n = size(u_arr) 
+function dpert(u::Array{Float64, 1}, s::Array{Float64,1})
+	du = dstep(u,s)
+	dpp_next = dpert_next(u,s)
+	dpp = du'\dpp_next'
+	return dpp'
+end
+function dpert(u::Array{Float64, 2}, s::Array{Float64,1})
+	du = dstep(u,s)
+	dpp_next = dpert_next(u,s)
+	d, n = size(u)
 	dpp = zeros(3,3,n)
-	ddsflow = zeros(3,3)
-	ddsflow[2,1] = 1.0
-	dsflow(x) = [0., x, 0.]
-	for j = 1:n
-		u = u_arr[:,j]
-		k1 = dt*flow(u, s)
-		dk1 = dt*dflow(u,s)
-		dk2 = dt*dflow(u .+ k1,s)
-		ddk2 = dt*d2flow(u .+ k1, s)
-		dsk1 = dt*dsflow(u[1])
-		ddsk1 = dt*ddsflow
-		d2 = dt*d2flow(u, s)
-    	d2p = permutedims(d2,[1, 3, 2]) 
-    	A = zeros(3,3,3)
-    	for j = 1:3
-    		A[:,:,j] .= d2p[:,:,j]*(1.0*I(3) .+ dk1) 
-    	end
-    	A = permutedims(A, [1,3,2])
-		ddsk2 = dt*ddsflow*(1.0*I(3) .+ dk1) .+
-			dk2*ddsk1 
-		for i = 1:3
-			ddsk2[:,i] .+= A[:,:,i]*dsk1
-		end
-		dpp[:,:,j] .= 0.5*(ddsk1 + ddsk2)			
-
-  	end
+	for i = 1:n
+		dpp[:,:,i] .= du'\dpp_next'
+		dpp[:,:,i] .= dpp[:,:,i]'
+	end
 	return dpp
 end
 
