@@ -170,7 +170,7 @@ function pert(u::Array{Float64,1},s::Array{Float64,1})
 	pp = 0.5*(dsk1 + dsk2)
 	return pp
 end
-function dpert(u::Array{Float64,1},s::Array{Float64,1})
+function dpert_next(u::Array{Float64,1},s::Array{Float64,1})
     dpp = zeros(3,3)
 	ddsflow = zeros(3,3)
 	ddsflow[2,1] = 1.0
@@ -201,22 +201,36 @@ function dpert(u::Array{Float64,1},s::Array{Float64,1})
 	dpp .= 0.5*(ddsk1 + ddsk2)			
 	return dpp
 end
-function dpert(u::Array{Float64,2},s::Array{Float64,1})
-    x, y, z = u[1,:], u[2,:], u[3,:]
-    sigma, rho, beta = s
-    n = size(u)[2]
-    dpp = zeros(3,3,n)
-    dpp[2,:,:] .= dt
-    
-    deno  = @. 1/(dt^3*sigma*(beta*(rho - z - 1) + x*(y - x)) + dt^2*(sigma*(-rho + beta + z + 1) + beta + x^2) - dt*(sigma + beta + 1) + 1)
-    du11 = @. (dt^2*beta + dt^2*x^2 - dt*beta - dt + 1)*deno
-    du12 = @. (dt^2*sigma*beta - dt*sigma)*deno 
-    du13 = @. (-dt^2*sigma*x)*deno
-    dpp[2,1,:] .*= du11
-    dpp[2,2,:] .*= du12
-    dpp[2,3,:] .*= du13
+function dpert_next(u_arr::Array{Float64,2},s::Array{Float64,1})
+	d, n = size(u_arr) 
+	dpp = zeros(3,3,n)
+	ddsflow = zeros(3,3)
+	ddsflow[2,1] = 1.0
+	dsflow(x) = [0., x, 0.]
+	for j = 1:n
+		u = u_arr[:,j]
+		k1 = dt*flow(u, s)
+		dk1 = dt*dflow(u,s)
+		dk2 = dt*dflow(u .+ k1,s)
+		ddk2 = dt*d2flow(u .+ k1, s)
+		dsk1 = dt*dsflow(u[1])
+		ddsk1 = dt*ddsflow
+		d2 = dt*d2flow(u, s)
+    	d2p = permutedims(d2,[1, 3, 2]) 
+    	A = zeros(3,3,3)
+    	for j = 1:3
+    		A[:,:,j] .= d2p[:,:,j]*(1.0*I(3) .+ dk1) 
+    	end
+    	A = permutedims(A, [1,3,2])
+		ddsk2 = dt*ddsflow*(1.0*I(3) .+ dk1) .+
+			dk2*ddsk1 
+		for i = 1:3
+			ddsk2[:,i] .+= A[:,:,i]*dsk1
+		end
+		dpp[:,:,j] .= 0.5*(ddsk1 + ddsk2)			
 
-    return dpp
+  	end
+	return dpp
 end
 
 ### AD functions
