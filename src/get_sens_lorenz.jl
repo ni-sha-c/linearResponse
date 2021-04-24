@@ -58,12 +58,13 @@ function sens(s,nSteps)
         alpha = norm(q1)
         q1 ./= alpha
         alpha2 = alpha*alpha
-        
+		th = dot(q1, f1)
+        th2 = 1.0 - th*th
+
         vs1 .= dui*vs + ppi
-        a[i+1] = dot(vs1, q1)
-		vs1 .-= a[i+1]*q1
-		c[i+1] = dot(vs1, f1)
-        vs1 .-= c[i+1]*f1
+        a[i+1] = dot(vs1, q1 - th*f1)/th2
+		c[i+1] = dot(vs1, f1 - th*q1)/th2
+		vs1 .= vs1 .- c[i+1]*f1 .- a[i+1]*q1
         
 		d2q = zeros(d,d)
 		for j = 1:d
