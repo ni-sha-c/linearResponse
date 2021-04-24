@@ -41,6 +41,7 @@ function sens(s,nSteps)
     beta = zeros(nSteps)
 	dJf = zeros(nSteps)
 	Da = zeros(nSteps)
+	Dc = zeros(nSteps)
     Dq = zeros(d)
     Dvs = zeros(d)
     Dvs1 = zeros(d)
@@ -76,12 +77,7 @@ function sens(s,nSteps)
         dalphadx = dot(alpha2*Dq, q1)
         Dq .= Dq .- dot(Dq,q1)*q1
 
-        Dvs1 .= d2q*vs/alpha + dui*Dvs/alpha + dppi*q1/alpha
-        Da[i+1] = dot(vs1, Dq) + dot(Dvs1, q1)
-        Dvs1 .= Dvs1 - Da[i+1]*q1 - a[i+1]*Dq
-        Delta_Da = dot(Dvs1, q1) + dot(vs1, Dq) 
-        Dvs1 .-= Delta_Da*q
-        Da[i+1] += Delta_Da
+        Dvs1 .= d2q*vs/alpha + dui*Dvs/alpha + dppi*q1
         
         g[i+1] = g[i]/alpha - dalphadx/alpha2 
         
