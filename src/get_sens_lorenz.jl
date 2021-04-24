@@ -30,7 +30,7 @@ function sens(s,nSteps)
     nSteps = nSteps + 1
     g = zeros(nSteps)
     J = copy(z)
-   
+    dJdu = [0., 0., 1.]
     # Df represents the derivative of f 
     # on the 
     # unstable manifold.
@@ -39,7 +39,8 @@ function sens(s,nSteps)
     a = zeros(nSteps)
     c = zeros(nSteps)
     beta = zeros(nSteps)
-    Da = zeros(nSteps)
+	dJf = zeros(nSteps)
+	Da = zeros(nSteps)
     Dq = zeros(d)
     Dvs = zeros(d)
     Dvs1 = zeros(d)
@@ -83,8 +84,11 @@ function sens(s,nSteps)
         Da[i+1] += Delta_Da
         
         g[i+1] = g[i]/alpha - dalphadx/alpha2 
-        dJdu = [0., 0., 1.]
+        
+
         dJds_st += dot(dJdu, vs)/nSteps
+		dJf[i+1] = dot(dJdu, f1)
+
         vs .= vs1
         q .= q1
         Dvs .= Dvs1
