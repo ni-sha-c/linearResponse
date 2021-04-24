@@ -38,6 +38,7 @@ function sens(s,nSteps)
     # Xu = a q
     Xu = zeros(d, nSteps)
     a = zeros(nSteps)
+    c = zeros(nSteps)
     Da = zeros(nSteps)
     Dq = zeros(d)
     Dvs = zeros(d)
@@ -48,6 +49,7 @@ function sens(s,nSteps)
 	dui = du_trj[:,:,i] # for large systems, can't store Jacobian.
     	ppi = pp[:,i]
 	dppi = dpp[:,:,i]
+	fi = f_trj[:,i]
 	xi, yi, zi = x[i], y[i], z[i]
 
     	q1 .= dui*q

@@ -99,7 +99,7 @@ function sens(s,nSteps)
         dJds_ust -= dot(J_shift,Da_shift)/nJ 
         dJds_ust -= dot(J_shift,g_shift.*a_shift)/nJ
     end
-   
+    @show dJds_ust 
     return dJds_st + dJds_ust
 	
 end
