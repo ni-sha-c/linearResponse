@@ -66,7 +66,7 @@ function sens(s,nSteps)
         vs1 .= dui*vs + ppi
         a[i+1] = dot(vs1, q1 - th*f1)/th2
 		c[i+1] = dot(vs1, f1 - th*q1)/th2
-		vs1 .= vs1 .- c[i+1]*f1 .- a[i+1]*q1
+
         
 		d2q = zeros(d,d)
 		for j = 1:d
@@ -78,9 +78,23 @@ function sens(s,nSteps)
         Dq .= Dq .- dot(Dq,q1)*q1
 
         Dvs1 .= d2q*vs/alpha + dui*Dvs/alpha + dppi*q1
-        
+		Dth = dot(q1, r1) + dot(f1, Dq)
+		constant = 2*th*Dth/th2/th2
+		Da[i+1] = constant*dot(vs1, q1 - th*f1)
+		Da[i+1] += 1/th2*(dot(vs1, Dq - Dth*f1 - th*r1) + 
+					 dot(Dvs1, q1 - th*f1))
+
+		Dc1 = constant*dot(vs1, f1 - th*q1)
+		Dc1 += 1/th2*(dot(vs1, r1 - Dth*q1 - th*Dq) + 
+					 dot(Dvs1, f1 - th*q1))
+
+       
         g[i+1] = g[i]/alpha - dalphadx/alpha2 
-        
+        vs1 .= vs1 .- c[i+1]*f1 .- a[i+1]*q1
+
+		Dvs1 .= Dvs1 .+ dot(dppi, q1) - a[i+1]*Dq - 
+				Da[i+1]*q1 - c[i+1]*r1 - Dc1*f1
+				
 
         dJds_st += dot(dJdu, vs)/nSteps
 		dJf[i+1] = dot(dJdu, f1)
@@ -98,9 +112,10 @@ function sens(s,nSteps)
         a_shift = a[2:nJ+1]
         dJds_ust -= dot(J_shift,Da_shift)/nJ 
         dJds_ust -= dot(J_shift,g_shift.*a_shift)/nJ
+		dJds_c 
     end
     @show dJds_ust 
-    return dJds_st + dJds_ust
+    return dJds_st + dJds_ust + dJds_c
 	
 end
 function get_sens(s)
