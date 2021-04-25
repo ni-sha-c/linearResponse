@@ -106,15 +106,22 @@ function sens(s,nSteps)
 
     for n = 1:N
         J_shift = J[n+1:end]
+		dJf_shift = dJf[n+1:end]
+		betan_shift = beta[n+1:end]
+		
         nJ = length(J_shift)
         g_shift = g[2:nJ+1]
         Da_shift = Da[2:nJ+1]
         a_shift = a[2:nJ+1]
+		c_shift = c[2:nJ+1]
+		beta_shift = beta[2:nJ+1]
+
         dJds_ust -= dot(J_shift,Da_shift)/nJ 
         dJds_ust -= dot(J_shift,g_shift.*a_shift)/nJ
-		dJds_c 
+		dJds_c = dot(c_shift./beta_shift, dJf_shift.*betan_shift)/nJ 
     end
-    @show dJds_ust 
+    @show dJds_ust
+	@show dJds_c
     return dJds_st + dJds_ust + dJds_c
 	
 end
