@@ -10,31 +10,29 @@ function flow(u::Array{Float64,1},s::Array{Float64,1})
     x, y, z = u[1], u[2], u[3]
     return [sigma*(y - x), x*(rho - z) - y, x*y - beta*z]
 end
-function mag_flow(u::Array{Float64,1},s::Array{Float64,1})
-	sigma, rho, beta = s
-    x, y, z = u[1], u[2], u[3]
-	b2 = (sigma*(y - x))^2 + (x*(rho - z) - y)^2 +
-			(x*y - beta*z)^2
-	return sqrt(b2)
-end
 function mag_flow(u::Array{Float64,2},s::Array{Float64,1})
-	sigma, rho, beta = s
-	x, y, z = view(u,1,:), view(u,2,:), view(u,3,:)
-	b2 = @. (sigma*(y - x))^2 + (x*(rho - z) - y)^2 +
-			(x*y - beta*z)^2
-	return sqrt.(b2)
+	d, n = size(u)
+	mags = zeros(n)
+	for i = 1:n
+		mags[i] = norm(flow(u[:,i],s))
+	end
+	return mags
+end
+
+function mag_flow(u::Array{Float64,1},s::Array{Float64,1})
+	return norm(flow(u,s))
 end
 function dmag_flow(u::Array{Float64,1},s::Array{Float64,1})
 	sigma, rho, beta = s
 	x, y, z = u[1], u[2], u[3]
 	b = mag_flow(u,s)
-	dxb2 = -2.0*sigma*(y-x) + 2.0*(x*(rho - z) - y)*(rho - z) + 
-	        2.0*(x*y - beta*z)*y
-	dyb2 = 2.0*sigma*(y-x) - 2.0*(x*(rho - z) - y) + 
-	        2.0*(x*y - beta*z)*x
-	dzb2 = -2.0*(x*(rho - z) - y)*x - 
-			2.0*(x*y - beta*z)*beta
-	return 1/(2*b)*[dxb2, dyb2, dzb2]
+	dxb2 = -sigma*(y-x) + (x*(rho - z) - y)*(rho - z) + 
+	        (x*y - beta*z)*y
+	dyb2 = sigma*(y-x) - (x*(rho - z) - y) + 
+	        (x*y - beta*z)*x
+	dzb2 = -(x*(rho - z) - y)*x - 
+			(x*y - beta*z)*beta
+	return 1/b*[dxb2, dyb2, dzb2]
 end
 function step(u0, s, n)
     u_trj = zeros(3, n+1)

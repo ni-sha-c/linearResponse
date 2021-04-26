@@ -201,3 +201,19 @@ function test_dpert_next_arr()
 	@test dpp[:,2,1] ≈ dpert_dy_fd atol=1.e-8
 	@test dpp[:,3,1] ≈ dpert_dz_fd atol=1.e-8
 end
+function test_dmag_flow()
+	eps = 1.e-6
+	s = [10., 28., 8.0/3]
+	u = rand(3)
+	dmag_dx = (mag_flow(u + eps*[1.0,0,0],s) - 
+			   mag_flow(u - eps*[1.0,0,0],s))/(2*eps)
+	dmag_dy = (mag_flow(u + eps*[0,1.0,0],s) - 
+			   mag_flow(u - eps*[0,1.0,0],s))/(2*eps)
+	dmag_dz = (mag_flow(u + eps*[0,0,1.0],s) - 
+			   mag_flow(u - eps*[0,0,1.0],s))/(2*eps)
+
+	dmag = dmag_flow(u, s)
+	#@test dmag[1] ≈ dmag_dx atol=1.e-8
+	@test dmag[2] ≈ dmag_dy atol=1.e-8
+	@test dmag[3] ≈ dmag_dz atol=1.e-8
+end
