@@ -217,3 +217,19 @@ function test_dmag_flow()
 	@test dmag[2] ≈ dmag_dy atol=1.e-8
 	@test dmag[3] ≈ dmag_dz atol=1.e-8
 end
+function test_dmag_flow_arr()
+	eps = 1.e-6
+	s = [10., 28., 8.0/3]
+	u = rand(3,1)
+	dmag_dx = (mag_flow(u .+ eps*reshape([1.0,0,0],3,1),s) - 
+			   mag_flow(u .- eps*reshape([1.0,0,0],3,1),s))/(2*eps)
+	dmag_dy = (mag_flow(u .+ eps*reshape([0,1.0,0],3,1),s) - 
+			   mag_flow(u .- eps*reshape([0,1.0,0],3,1),s))/(2*eps)
+	dmag_dz = (mag_flow(u .+ eps*reshape([0,0,1.0],3,1),s) - 
+			   mag_flow(u .- eps*reshape([0,0,1.0],3,1),s))/(2*eps)
+
+	dmag = dmag_flow(u, s)
+	@test dmag[1,:] ≈ dmag_dx atol=1.e-8
+	@test dmag[2,:] ≈ dmag_dy atol=1.e-8
+	@test dmag[3,:] ≈ dmag_dz atol=1.e-8
+end
