@@ -22,6 +22,22 @@ end
 function mag_flow(u::Array{Float64,1},s::Array{Float64,1})
 	return norm(flow(u,s))
 end
+function dmag_flow(u::Array{Float64,2},s::Array{Float64,1})
+	sigma, rho, beta = s
+	d, n = size(u)
+	db = zeros(d, n)
+	for i = 1:n
+		x, y, z = u[1,i],u[2,i],u[3,i]
+		term = [sigma*(y - x), x*(rho - z) - y, 
+			x*y - beta*z]
+		b = norm(term)
+		db[1,i] = dot([-sigma, (rho - z), y], term./b)
+		db[2,i] = dot([sigma, -1, x], term./b)
+		db[3,i] = dot([0., -x, -beta], term./b)
+	end
+	return db
+end
+
 function dmag_flow(u::Array{Float64,1},s::Array{Float64,1})
 	sigma, rho, beta = s
 	x, y, z = u[1], u[2], u[3]
