@@ -25,14 +25,14 @@ end
 function dmag_flow(u::Array{Float64,1},s::Array{Float64,1})
 	sigma, rho, beta = s
 	x, y, z = u[1], u[2], u[3]
-	b = mag_flow(u,s)
-	dxb2 = -sigma*(y-x) + (x*(rho - z) - y)*(rho - z) + 
-	        (x*y - beta*z)*y
-	dyb2 = sigma*(y-x) - (x*(rho - z) - y) + 
-	        (x*y - beta*z)*x
-	dzb2 = -(x*(rho - z) - y)*x - 
-			(x*y - beta*z)*beta
-	return 1/b*[dxb2, dyb2, dzb2]
+	
+	term = [sigma*(y - x), x*(rho - z) - y, 
+			x*y - beta*z]
+	b = norm(term)
+	dxb2 = dot([-sigma, (rho - z), y], term./b)
+	dyb2 = dot([sigma, -1, x], term./b)
+	dzb2 = dot([0., -x, -beta], term./b)
+	return [dxb2, dyb2, dzb2]
 end
 function step(u0, s, n)
     u_trj = zeros(3, n+1)

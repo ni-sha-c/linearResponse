@@ -213,7 +213,7 @@ function test_dmag_flow()
 			   mag_flow(u - eps*[0,0,1.0],s))/(2*eps)
 
 	dmag = dmag_flow(u, s)
-	#@test dmag[1] ≈ dmag_dx atol=1.e-8
+	@test dmag[1] ≈ dmag_dx atol=1.e-8
 	@test dmag[2] ≈ dmag_dy atol=1.e-8
 	@test dmag[3] ≈ dmag_dz atol=1.e-8
 end
