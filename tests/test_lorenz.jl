@@ -233,3 +233,26 @@ function test_dmag_flow_arr()
 	@test dmag[2,:] ≈ dmag_dy atol=1.e-8
 	@test dmag[3,:] ≈ dmag_dz atol=1.e-8
 end
+function test_dunit_flow()
+	eps = 1.e-6
+	s = [10., 28., 8/3]
+	u = rand(3)
+	upx = u .+ eps*[1.0,0,0]
+	umx = u .- eps*[1.0,0,0]
+	upy = u .+ eps*[0,1.0,0]
+	umy = u .- eps*[0,1.0,0]
+	upz = u .- eps*[0,0,1.0]
+	umz = u .- eps*[0,0,1.0]
+	dfdx = (flow(upx,s)/mag_flow(upx,s) .- 
+			flow(umx,s)/mag_flow(umx,s))/(2*eps) 	
+	dfdy = (flow(upy,s)/mag_flow(upy,s) .- 
+			flow(umy,s)/mag_flow(umy,s))/(2*eps) 	
+	dfdz = (flow(upz,s)/mag_flow(upz,s) .- 
+			flow(umz,s)/mag_flow(umz,s))/(2*eps) 	
+	df = dunit_flow(u, s)
+
+	@test df[:,1] ≈ dfdx atol=1.e-8
+	@test df[:,2] ≈ dfdy atol=1.e-8
+	@test df[:,3] ≈ dfdz atol=1.e-8
+
+end
