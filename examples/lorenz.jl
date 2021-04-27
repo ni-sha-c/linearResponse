@@ -18,7 +18,6 @@ function mag_flow(u::Array{Float64,2},s::Array{Float64,1})
 	end
 	return mags
 end
-
 function mag_flow(u::Array{Float64,1},s::Array{Float64,1})
 	return norm(flow(u,s))
 end
@@ -37,7 +36,6 @@ function dmag_flow(u::Array{Float64,2},s::Array{Float64,1})
 	end
 	return db
 end
-
 function dmag_flow(u::Array{Float64,1},s::Array{Float64,1})
 	sigma, rho, beta = s
 	x, y, z = u[1], u[2], u[3]
@@ -50,6 +48,18 @@ function dmag_flow(u::Array{Float64,1},s::Array{Float64,1})
 	dzb2 = dot([0., -x, -beta], term./b)
 	return [dxb2, dyb2, dzb2]
 end
+function dunit_flow(u::Array{Float64,1},s::Array{Float64,1})
+	sigma, rho, beta = s
+    x, y, z = u[1], u[2], u[3]
+	dF = dflow(u, s)
+    F = [sigma*(y - x), x*(rho - z) - y, x*y - beta*z]
+	b2 = dot(F,F)
+	db = dmag_flow(u, s)
+	dF = -db/b2.*[F F F]
+	dF .= dF .+ (1.0/sqrt(b2))*dF 
+	return dF
+end
+
 function step(u0, s, n)
     u_trj = zeros(3, n+1)
     u_trj[:,1] = u0
