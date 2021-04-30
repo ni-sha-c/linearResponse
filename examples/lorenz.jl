@@ -51,12 +51,11 @@ end
 function dunit_flow(u::Array{Float64,1},s::Array{Float64,1})
 	sigma, rho, beta = s
     x, y, z = u[1], u[2], u[3]
-	dF = dflow(u, s)
     F = [sigma*(y - x), x*(rho - z) - y, x*y - beta*z]
 	b2 = dot(F,F)
 	db = dmag_flow(u, s)
-	dF = -db/b2.*[F F F]
-	dF .= dF .+ (1.0/sqrt(b2))*dF 
+	dF = -(db'/b2).*[F F F]
+	dF = dF .+ (1.0/sqrt(b2))*dflow(u,s) 
 	return dF
 end
 

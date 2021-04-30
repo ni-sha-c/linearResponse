@@ -250,6 +250,7 @@ function test_dunit_flow()
 	dfdz = (flow(upz,s)/mag_flow(upz,s) .- 
 			flow(umz,s)/mag_flow(umz,s))/(2*eps) 	
 	df = dunit_flow(u, s)
+	@show dfdx, df[:,1]
 
 	@test df[:,1] ≈ dfdx atol=1.e-8
 	@test df[:,2] ≈ dfdy atol=1.e-8

@@ -15,6 +15,7 @@ function sens(s,nSteps)
     du_trj = dstep(u_trj, s)
     ddu_trj = d2step(u_trj,s)
 	f_trj = flow(u_trj,s)
+
 	vs = zeros(d)
     q = rand(d)
     q /= norm(q)
@@ -55,6 +56,7 @@ function sens(s,nSteps)
         xi, yi, zi = x[i], y[i], z[i]
 		beta[i+1] = norm(f_trj[:,i+1])
 		f1 = f_trj[:,i+1]/beta[i+1]
+		r1 = dunit_flow([xi,yi,zi],s)
 
         q1 .= dui*q
         alpha = norm(q1)
@@ -76,7 +78,8 @@ function sens(s,nSteps)
         Dq = d2q*q/alpha2 + dui*Dq/alpha2
         dalphadx = dot(alpha2*Dq, q1)
         Dq .= Dq .- dot(Dq,q1)*q1
-
+		
+		
         Dvs1 .= d2q*vs/alpha + dui*Dvs/alpha + dppi*q1
 		Dth = dot(q1, r1) + dot(f1, Dq)
 		constant = 2*th*Dth/th2/th2
