@@ -1,7 +1,7 @@
 using Distributed
 addprocs(16)
 @everywhere include("../src/get_sens_lorenz.jl")
-si = LinRange(25.,29.0,10)
+si = LinRange(28.,28.0,1)
 s = zeros(3,10)
 s[2,:] .= si
 s[1,:] .= 10.

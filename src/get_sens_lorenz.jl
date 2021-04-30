@@ -14,9 +14,9 @@ function sens(s,nSteps)
     x, y, z = view(u_trj,1,:), view(u_trj,2,:), view(u_trj,3,:)
     du_trj = dstep(u_trj, s)
     ddu_trj = d2step(u_trj,s)
-	f_trj = flow(u_trj,s)
+    f_trj = flow(u_trj,s)
 
-	vs = zeros(d)
+    vs = zeros(d)
     q = rand(d)
     q /= norm(q)
 
@@ -27,6 +27,7 @@ function sens(s,nSteps)
     
     dJds_st = 0.
     dJds_ust = 0.
+    dJds_c = 0.
     N = 1000
     nSteps = nSteps + 1
     g = zeros(nSteps)
@@ -40,67 +41,68 @@ function sens(s,nSteps)
     a = zeros(nSteps)
     c = zeros(nSteps)
     beta = zeros(nSteps)
-	dJf = zeros(nSteps)
-	Da = zeros(nSteps)
-	Dc = zeros(nSteps)
+    dJf = zeros(nSteps)
+    Da = zeros(nSteps)
+    Dc = zeros(nSteps)
     Dq = zeros(d)
     Dvs = zeros(d)
     Dvs1 = zeros(d)
     rho = s[2]
-	
+    
     # nSteps large number.
     for i = 1:nSteps-1
         dui = du_trj[:,:,i] # for large systems, can't store Jacobian.
         ppi = pp[:,i]
         dppi = dpp[:,:,i]
         xi, yi, zi = x[i], y[i], z[i]
-		beta[i+1] = norm(f_trj[:,i+1])
-		f1 = f_trj[:,i+1]/beta[i+1]
-		r1 = dunit_flow([xi,yi,zi],s)
+    	beta[i+1] = norm(f_trj[:,i+1])
+    	f1 = f_trj[:,i+1]/beta[i+1]
+
 
         q1 .= dui*q
         alpha = norm(q1)
         q1 ./= alpha
         alpha2 = alpha*alpha
-		th = dot(q1, f1)
+    	th = dot(q1, f1)
         th2 = 1.0 - th*th
+        r1 = dunit_flow([xi,yi,zi],s)*q1
 
         vs1 .= dui*vs + ppi
         a[i+1] = dot(vs1, q1 - th*f1)/th2
-		c[i+1] = dot(vs1, f1 - th*q1)/th2
+    	c[i+1] = dot(vs1, f1 - th*q1)/th2
 
         
-		d2q = zeros(d,d)
-		for j = 1:d
-			d2q[:,j] .= ddu_trj[:,:,j,i]*q
-		end
+    	d2q = zeros(d,d)
+    	for j = 1:d
+    		d2q[:,j] .= ddu_trj[:,:,j,i]*q
+    	end
          
         Dq = d2q*q/alpha2 + dui*Dq/alpha2
         dalphadx = dot(alpha2*Dq, q1)
         Dq .= Dq .- dot(Dq,q1)*q1
-		
-		
+    	
+    	
         Dvs1 .= d2q*vs/alpha + dui*Dvs/alpha + dppi*q1
-		Dth = dot(q1, r1) + dot(f1, Dq)
-		constant = 2*th*Dth/th2/th2
-		Da[i+1] = constant*dot(vs1, q1 - th*f1)
-		Da[i+1] += 1/th2*(dot(vs1, Dq - Dth*f1 - th*r1) + 
-					 dot(Dvs1, q1 - th*f1))
+    	Dth = dot(q1, r1) + dot(f1, Dq)
+    	constant = 2*th*Dth/th2/th2
+    	Da[i+1] = constant*dot(vs1, q1 - th*f1)
+    	Da[i+1] += 1/th2*(dot(vs1, Dq - Dth*f1 - th*r1) + 
+    				 dot(Dvs1, q1 - th*f1))
 
-		Dc1 = constant*dot(vs1, f1 - th*q1)
-		Dc1 += 1/th2*(dot(vs1, r1 - Dth*q1 - th*Dq) + 
-					 dot(Dvs1, f1 - th*q1))
+    	Dc1 = constant*dot(vs1, f1 - th*q1)
+    	Dc1 += 1/th2*(dot(vs1, r1 - Dth*q1 - th*Dq) + 
+    				 dot(Dvs1, f1 - th*q1))
 
        
         g[i+1] = g[i]/alpha - dalphadx/alpha2 
         vs1 .= vs1 .- c[i+1]*f1 .- a[i+1]*q1
 
-		Dvs1 .= Dvs1 .+ dot(dppi, q1) - a[i+1]*Dq - 
-				Da[i+1]*q1 - c[i+1]*r1 - Dc1*f1
-				
+    	Dvs1 .= Dvs1 .+  dppi*q1 - a[i+1]*Dq - 
+    			Da[i+1]*q1 - c[i+1]*r1 - Dc1*f1
+    			
 
         dJds_st += dot(dJdu, vs)/nSteps
-		dJf[i+1] = dot(dJdu, f1)
+    	dJf[i+1] = dot(dJdu, f1)
 
         vs .= vs1
         q .= q1
@@ -109,24 +111,24 @@ function sens(s,nSteps)
 
     for n = 1:N
         J_shift = J[n+1:end]
-		dJf_shift = dJf[n+1:end]
-		betan_shift = beta[n+1:end]
-		
+    	dJf_shift = dJf[n+1:end]
+    	betan_shift = beta[n+1:end]
+    	
         nJ = length(J_shift)
         g_shift = g[2:nJ+1]
         Da_shift = Da[2:nJ+1]
         a_shift = a[2:nJ+1]
-		c_shift = c[2:nJ+1]
-		beta_shift = beta[2:nJ+1]
+    	c_shift = c[2:nJ+1]
+    	beta_shift = beta[2:nJ+1]
 
         dJds_ust -= dot(J_shift,Da_shift)/nJ 
         dJds_ust -= dot(J_shift,g_shift.*a_shift)/nJ
-		dJds_c = dot(c_shift./beta_shift, dJf_shift.*betan_shift)/nJ 
+    	dJds_c += dot(c_shift./beta_shift, dJf_shift.*betan_shift)/nJ 
     end
     @show dJds_ust
-	@show dJds_c
+    @show dJds_c
     return dJds_st + dJds_ust + dJds_c
-	
+    
 end
 function get_sens(s)
     nSteps = 500000
