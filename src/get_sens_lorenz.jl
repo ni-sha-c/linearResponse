@@ -28,7 +28,7 @@ function sens(s,nSteps)
     dJds_st = 0.
     dJds_ust = 0.
     dJds_c = 0.
-    N = 1000
+    N = 600
     nSteps = nSteps + 1
     g = zeros(nSteps)
     J = copy(z)
@@ -123,7 +123,7 @@ function sens(s,nSteps)
 
         dJds_ust -= dot(J_shift,Da_shift)/nJ 
         dJds_ust -= dot(J_shift,g_shift.*a_shift)/nJ
-    	dJds_c += dot(c_shift./beta_shift, dJf_shift.*betan_shift)/nJ 
+    	dJds_c -= dot(c_shift./beta_shift, dJf_shift.*betan_shift)/nJ 
     end
     @show dJds_ust
     @show dJds_c
