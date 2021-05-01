@@ -1,6 +1,6 @@
 include("../examples/lorenz.jl")
 using Test
-using PyPlot
+#using PyPlot
 function test_attractor()
 	s = [10., 28., 8.0/3]
 	u = rand(3)

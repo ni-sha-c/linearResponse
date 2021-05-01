@@ -79,7 +79,7 @@ function sens(s,nSteps)
          
         Dq1 .= d2q*q/alpha2 + dui*Dq/alpha2
         dalphadx = dot(Dq1, q1)*alpha
-	Dq1 .= Dq1 .- dalphadx*q1/alpha2
+	Dq1 .= Dq1 .- dalphadx*q1/alpha
     	@show dot(Dq1, q1)	
     	
         Dvs1 .= d2q*vs/alpha + dui*Dvs/alpha + dppi*q1
