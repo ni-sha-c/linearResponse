@@ -28,7 +28,7 @@ function sens(s,nSteps)
     dJds_st = 0.
     dJds_ust = 0.
     dJds_c = 0.
-    N = 550
+    N = 1000
     nSteps = nSteps + 1
     g = zeros(nSteps)
     J = copy(z)
@@ -36,8 +36,6 @@ function sens(s,nSteps)
     # Df represents the derivative of f 
     # on the 
     # unstable manifold.
-    # Xu = a q
-    Xu = zeros(d, nSteps)
     a = zeros(nSteps)
     c = zeros(nSteps)
     beta = zeros(nSteps)
@@ -45,8 +43,11 @@ function sens(s,nSteps)
     Da = zeros(nSteps)
     Dc = zeros(nSteps)
     Dq = zeros(d)
+    Dq1 = zeros(d)
     Dvs = zeros(d)
     Dvs1 = zeros(d)
+    d2varphi = zeros(d,d,d)
+    d2q = zeros(d,d)
     rho = s[2]
     
     # nSteps large number.
@@ -54,7 +55,6 @@ function sens(s,nSteps)
         dui = du_trj[:,:,i] # for large systems, can't store Jacobian.
         ppi = pp[:,i]
         dppi = dpp[:,:,i]
-        xi, yi, zi = x[i], y[i], z[i]
     	beta[i+1] = norm(f_trj[:,i+1])
     	f1 = f_trj[:,i+1]/beta[i+1]
 
@@ -71,34 +71,36 @@ function sens(s,nSteps)
         a[i+1] = dot(vs1, q1 - th*f1)/th2
     	c[i+1] = dot(vs1, f1 - th*q1)/th2
 
-        
-    	d2q = zeros(d,d)
+        d2varphi .= permutedims(ddu_trj[:,:,:,i], 
+				 [1,3,2]) 
     	for j = 1:d
-    		d2q[:,j] .= ddu_trj[:,:,j,i]*q
+    		d2q[:,j] .= d2varphi[:,:,j]*q
     	end
          
-        Dq = d2q*q/alpha2 + dui*Dq/alpha2
-        dalphadx = dot(Dq, q1)*alpha
-	Dq .= Dq .- dalphadx*q1/alpha2
-    	
+        Dq1 .= d2q*q/alpha2 + dui*Dq/alpha2
+        dalphadx = dot(Dq1, q1)*alpha
+	Dq1 .= Dq1 .- dalphadx*q1/alpha2
+    	@show dot(Dq1, q1)	
     	
         Dvs1 .= d2q*vs/alpha + dui*Dvs/alpha + dppi*q1
-    	Dth = dot(q1, r1) + dot(f1, Dq)
+    	Dth = dot(q1, r1) + dot(f1, Dq1)
     	constant = 2*th*Dth/th2/th2
     	Da[i+1] = constant*dot(vs1, q1 - th*f1)
-    	Da[i+1] += 1/th2*(dot(vs1, Dq - Dth*f1 - th*r1) + 
+    	Da[i+1] += 1/th2*(dot(vs1, Dq1 - Dth*f1 - th*r1) + 
     				 dot(Dvs1, q1 - th*f1))
 
     	Dc1 = constant*dot(vs1, f1 - th*q1)
-    	Dc1 += 1/th2*(dot(vs1, r1 - Dth*q1 - th*Dq) + 
+    	Dc1 += 1/th2*(dot(vs1, r1 - Dth*q1 - th*Dq1) + 
     				 dot(Dvs1, f1 - th*q1))
 
        
         g[i+1] = g[i]/alpha - dalphadx/alpha 
         vs1 .= vs1 .- c[i+1]*f1 .- a[i+1]*q1
 
-    	Dvs1 .= Dvs1 .- a[i+1]*Dq .- Da[i+1]*q1 .- c[i+1]*r1 .- Dc1*f1
-    			
+    	Dvs1 .= Dvs1 .- a[i+1]*Dq1 .- Da[i+1]*q1 .- c[i+1]*r1 .- Dc1*f1
+    	@show dot(Dvs1, q1) + dot(vs1, Dq1)
+    	@show dot(Dvs1, f1) + dot(vs1, r1)
+	
 
         dJds_st += dot(dJdu, vs)/nSteps
     	dJf[i+1] = dot(dJdu, f1)
@@ -106,6 +108,7 @@ function sens(s,nSteps)
         vs .= vs1
         q .= q1
         Dvs .= Dvs1
+	Dq .= Dq1
     end
 
     for n = 1:N
@@ -130,7 +133,7 @@ function sens(s,nSteps)
     
 end
 function get_sens(s)
-    nSteps = 500000
+    nSteps = 100000
     n_exps = size(s)[2]
     dJds = zeros(n_exps)
     var_dJds = zeros(n_exps)
