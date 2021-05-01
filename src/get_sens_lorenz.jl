@@ -28,7 +28,7 @@ function sens(s,nSteps)
     dJds_st = 0.
     dJds_ust = 0.
     dJds_c = 0.
-    N = 600
+    N = 550
     nSteps = nSteps + 1
     g = zeros(nSteps)
     J = copy(z)
@@ -65,7 +65,7 @@ function sens(s,nSteps)
         alpha2 = alpha*alpha
     	th = dot(q1, f1)
         th2 = 1.0 - th*th
-        r1 = dunit_flow([xi,yi,zi],s)*q1
+        r1 = dunit_flow([x[i+1],y[i+1],z[i+1]],s)*q1
 
         vs1 .= dui*vs + ppi
         a[i+1] = dot(vs1, q1 - th*f1)/th2
@@ -78,8 +78,8 @@ function sens(s,nSteps)
     	end
          
         Dq = d2q*q/alpha2 + dui*Dq/alpha2
-        dalphadx = dot(alpha2*Dq, q1)
-        Dq .= Dq .- dot(Dq,q1)*q1
+        dalphadx = dot(Dq, q1)*alpha
+	Dq .= Dq .- dalphadx*q1/alpha2
     	
     	
         Dvs1 .= d2q*vs/alpha + dui*Dvs/alpha + dppi*q1
@@ -94,11 +94,10 @@ function sens(s,nSteps)
     				 dot(Dvs1, f1 - th*q1))
 
        
-        g[i+1] = g[i]/alpha - dalphadx/alpha2 
+        g[i+1] = g[i]/alpha - dalphadx/alpha 
         vs1 .= vs1 .- c[i+1]*f1 .- a[i+1]*q1
 
-    	Dvs1 .= Dvs1 .+  dppi*q1 - a[i+1]*Dq - 
-    			Da[i+1]*q1 - c[i+1]*r1 - Dc1*f1
+    	Dvs1 .= Dvs1 .- a[i+1]*Dq .- Da[i+1]*q1 .- c[i+1]*r1 .- Dc1*f1
     			
 
         dJds_st += dot(dJdu, vs)/nSteps
