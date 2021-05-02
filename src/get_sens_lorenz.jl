@@ -28,7 +28,7 @@ function sens(s,nSteps)
     dJds_st = 0.
     dJds_ust = 0.
     dJds_c = 0.
-    N = 1000
+    N = 550
     nSteps = nSteps + 1
     g = zeros(nSteps)
     J = copy(z)
@@ -98,8 +98,6 @@ function sens(s,nSteps)
         vs1 .= vs1 .- c[i+1]*f1 .- a[i+1]*q1
 
     	Dvs1 .= Dvs1 .- a[i+1]*Dq1 .- Da[i+1]*q1 .- c[i+1]*r1 .- Dc1*f1
-    	@show dot(Dvs1, q1) + dot(vs1, Dq1)
-    	@show dot(Dvs1, f1) + dot(vs1, r1)
 	
 
         dJds_st += dot(dJdu, vs)/nSteps
@@ -125,7 +123,7 @@ function sens(s,nSteps)
 
         dJds_ust -= dot(J_shift,Da_shift)/nJ 
         dJds_ust -= dot(J_shift,g_shift.*a_shift)/nJ
-    	dJds_c -= dot(c_shift./beta_shift, dJf_shift.*betan_shift)/nJ 
+    	dJds_c += dot(c_shift./beta_shift, dJf_shift.*betan_shift)/nJ 
     end
     @show dJds_ust
     @show dJds_c
@@ -133,7 +131,7 @@ function sens(s,nSteps)
     
 end
 function get_sens(s)
-    nSteps = 100000
+    nSteps = 200000
     n_exps = size(s)[2]
     dJds = zeros(n_exps)
     var_dJds = zeros(n_exps)
