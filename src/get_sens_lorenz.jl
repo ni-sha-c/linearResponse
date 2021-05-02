@@ -28,11 +28,11 @@ function sens(s,nSteps)
     dJds_st = 0.
     dJds_ust = 0.
     dJds_c = 0.
-    N = 550
+    N = 1000
     nSteps = nSteps + 1
     g = zeros(nSteps)
-    J = copy(z)
-    dJdu = [0., 0., 1.]
+    J = (z .- 28.0).^2.0
+    #dJdu = [0., 0., 1.]
     # Df represents the derivative of f 
     # on the 
     # unstable manifold.
@@ -80,7 +80,6 @@ function sens(s,nSteps)
         Dq1 .= d2q*q/alpha2 + dui*Dq/alpha2
         dalphadx = dot(Dq1, q1)*alpha
 	Dq1 .= Dq1 .- dalphadx*q1/alpha
-    	@show dot(Dq1, q1)	
     	
         Dvs1 .= d2q*vs/alpha + dui*Dvs/alpha + dppi*q1
     	Dth = dot(q1, r1) + dot(f1, Dq1)
@@ -99,7 +98,7 @@ function sens(s,nSteps)
 
     	Dvs1 .= Dvs1 .- a[i+1]*Dq1 .- Da[i+1]*q1 .- c[i+1]*r1 .- Dc1*f1
 	
-
+	dJdu = [0.,0., 2*(z[i] - 28.0)]
         dJds_st += dot(dJdu, vs)/nSteps
     	dJf[i+1] = dot(dJdu, f1)
 
@@ -125,13 +124,11 @@ function sens(s,nSteps)
         dJds_ust -= dot(J_shift,g_shift.*a_shift)/nJ
     	dJds_c += dot(c_shift./beta_shift, dJf_shift.*betan_shift)/nJ 
     end
-    @show dJds_ust
-    @show dJds_c
     return dJds_st + dJds_ust + dJds_c
     
 end
 function get_sens(s)
-    nSteps = 200000
+    nSteps = 1000000
     n_exps = size(s)[2]
     dJds = zeros(n_exps)
     var_dJds = zeros(n_exps)
@@ -147,7 +144,7 @@ function get_sens(s)
         dJds[k] = sum(dJds_proc)
         var_dJds[k] = n_rep*sum(dJds_proc.*dJds_proc) - (dJds[k])^2
     end
-    save("../data/sens/lorenz/dJds.jld", "rho",
+    save("../data/sens/lorenz/dJds_squareObj.jld", "rho",
          s[2,:], "dJds", dJds, "var_dJds", var_dJds)
 end
     
