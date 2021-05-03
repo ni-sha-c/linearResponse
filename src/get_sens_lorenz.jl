@@ -28,7 +28,7 @@ function sens(s,nSteps)
     dJds_st = 0.
     dJds_ust = 0.
     dJds_c = 0.
-    N = 1000
+    N = 2000
     nSteps = nSteps + 1
     g = zeros(nSteps)
     J = (z .- 28.0).^2.0
@@ -128,7 +128,7 @@ function sens(s,nSteps)
     
 end
 function get_sens(s)
-    nSteps = 1000000
+    nSteps = 200000
     n_exps = size(s)[2]
     dJds = zeros(n_exps)
     var_dJds = zeros(n_exps)
@@ -144,7 +144,7 @@ function get_sens(s)
         dJds[k] = sum(dJds_proc)
         var_dJds[k] = n_rep*sum(dJds_proc.*dJds_proc) - (dJds[k])^2
     end
-    save("../data/sens/lorenz/dJds_squareObj.jld", "rho",
+    save("../data/sens/lorenz/dvarz_ds2_2000.jld", "rho",
          s[2,:], "dJds", dJds, "var_dJds", var_dJds)
 end
     

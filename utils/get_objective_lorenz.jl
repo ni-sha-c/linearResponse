@@ -18,7 +18,7 @@ function get_Javg_vs_s()
     n_pts = 10
     n_rep = 16000
     s = [10.0, 28.0, 8/3]
-    s_ind = LinRange(27.5,30.5,n_pts)
+    s_ind = LinRange(27.5,31.5,n_pts)
     J = zeros(n_pts)
     J_proc = SharedArray{Float64}(n_rep)
     for i = 1:n_pts
