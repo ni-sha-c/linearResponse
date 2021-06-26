@@ -7,21 +7,14 @@ end
 function step(x, s, n)
     x_trj = zeros(3, n+1)
     x_trj[:,1] = x
+	s0, s1, s2 = s[1], s[2], s[3]
     for i = 2:n+1
     	x, y, z = x_trj[:,i-1]
     	r, t = cart_to_cyl(x,y)
-    	sx, sy = sin(x), sin(2*y)/2
-    	x1 = (2*x + 
-    		(s[1] + s[2]*sy)*sx) 
-    	y1 = (0.5*y + 
-    		(s[4] + s[3]*sx)*sy)   
-    	
-    	x_trj[1,i] = x < pi ? x1 : x1 - 2*pi 
-    	x_trj[2,i] = x < pi ? y1 : y1 + pi
-    	
-    	x_trj[1,i] = x_trj[1,i] % (2*pi)
-    	x_trj[2,i] = x_trj[2,i] % (2*pi)
-
+		r1 = s0 + (r - s0)/s1 + cos(t)/2
+		t1 = 2*t + 2π*s2*sin(2*t) 
+		x_trj[3,i] = z/s1 + sin(t)/2
+    	x_trj[1,i], x_trj[2,i] = cyl_to_cart(r1,t1)
     end
     return x_trj
 end
