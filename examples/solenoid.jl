@@ -4,6 +4,15 @@ end
 function cyl_to_cart(r,t)
     return [r*cos(t), r*sin(t)] 
 end
+function dcart_to_cyl(x,y)
+	r2 = x*x + y*y 
+	r = sqrt(r2)
+	return [x/r y/r; -y/r2 x/r2]
+end
+function dcyl_to_cart(r,t)
+	ct, st = cos(t), sin(t)
+	return [ct -r*st;st r*ct]	
+end
 function step(x, s, n)
     x_trj = zeros(3, n+1)
     x_trj[:,1] = x
@@ -26,14 +35,16 @@ end
 
 function dstep(u::Array{Float64,1},s::Array{Float64,1})
     du = zeros(2,2)
-    x, y = u[1], u[2]
-    sx, sy = sin(x), sin(2*y)/2
-    dsx, dsy = cos(x), cos(2*y)
-    du[1,1] = 2 + s[1]*dsx + s[2]*sy*dsx 
-    du[1,2] = s[2]*sx*dsy
-    du[2,1] = s[3]*dsx*sy
-    du[2,2] = 0.5 + s[4]*dsy + s[3]*sx*dsy
-    return du
+	s0, s1, s2 = s
+    x, y, z = u
+	r, t = cart_to_cyl(x,y)
+	dr1dr = 1/s1
+	dr1dt = -sin(t)/2
+	dt1dt = 2 + 4π*s2*cos(2*t)
+	dz1dt = cos(t)/2 
+	dz1dz = 1/s1
+
+	return du
 end
 
 function dstep(u::Array{Float64,2},s::Array{Float64,1})
