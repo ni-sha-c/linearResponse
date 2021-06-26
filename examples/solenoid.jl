@@ -9,13 +9,8 @@ function step(x, s, n)
     x_trj[:,1] = x
 	s0, s1, s2 = s[1], s[2], s[3]
     for i = 2:n+1
-    	x, y, z = x_trj[:,i-1]
-    	r, t = cart_to_cyl(x,y)
-		r1 = s0 + (r - s0)/s1 + cos(t)/2
-		t1 = 2*t + 2π*s2*sin(2*t) 
-		x_trj[3,i] = z/s1 + sin(t)/2
-    	x_trj[1,i], x_trj[2,i] = cyl_to_cart(r1,t1)
-    end
+   		x_trj[:,i] = next(x_trj[:,i-1],s)	
+	end
     return x_trj
 end
 function next(u, s)
