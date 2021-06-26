@@ -19,20 +19,14 @@ function step(x, s, n)
     return x_trj
 end
 function next(u, s)
-    x, y = u[1], u[2]
-    sx, sy = sin(x), sin(2*y)/2
-    x1 = (2*x + 
-    		(s[1] + s[2]*sy)*sx) 
-    y1 = (0.5*y + 
-    		(s[4] + s[3]*sx)*sy)   
-    	
-    x_next = x < pi ? x1 : x1 - 2*pi 
-    y_next = x < pi ? y1 : y1 + pi
-    	
-    x_next = x_next % (2*pi)
-    y_next = y_next % (2*pi)
-
-    return [x_next, y_next]
+    x, y, z = u
+	s0, s1, s2 = s
+	r, t = cart_to_cyl(x, y)
+	r1 = s0 + (r - s0)/s1 + cos(t)/2
+	t1 = 2*t + 2π*s2*sin(2*t)
+	z1 = z/s1 + sin(t)/2
+	x1, y1 = cyl_to_cart(r1,t1)
+    return [x1, y1, z1]
 end
 
 function dstep(u::Array{Float64,1},s::Array{Float64,1})
