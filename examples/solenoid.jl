@@ -38,12 +38,21 @@ function dstep(u::Array{Float64,1},s::Array{Float64,1})
 	s0, s1, s2 = s
     x, y, z = u
 	r, t = cart_to_cyl(x,y)
-	dr1dr = 1/s1
-	dr1dt = -sin(t)/2
-	dt1dt = 2 + 4π*s2*cos(2*t)
+	r1 = s0 + (r - s0)/s1 + cos(t)/2
+	t1 = 2*t + 2π*s2*sin(2*t)
+	z1 = z/s1 + sin(t)/2
+
+	drt1drt = [1/s1 -sin(t)/2;0 2 + 4π*s2*cos(2*t)]
 	dz1dt = cos(t)/2 
 	dz1dz = 1/s1
 
+	drtdxy = dcart_to_cyl(x,y)
+	dtdx, dtdy = drtdxy[2,1], drtdxy[2,2]
+	dxy1dxy = dcyl_to_cart(r1,t1)*drt1drt*drtdxy
+	dz1dz = 1/s1
+	dz1dxy = [dz1dt*dtdx dz1dt*dtdy]
+	
+	du = [dxy1dxy 0;dz1dxy dz1dz]
 	return du
 end
 
