@@ -1,5 +1,5 @@
 function cart_to_cyl(x,y)
-    return [sqrt(x*x + y*y), (atan2(y, x) + 2π)%(2π)]
+    return [sqrt(x*x + y*y), (atan(y, x) + 2π)%(2π)]
 end
 function cyl_to_cart(r,t)
     return [r*cos(t), r*sin(t)] 
@@ -49,10 +49,10 @@ function dstep(u::Array{Float64,1},s::Array{Float64,1})
 	drtdxy = dcart_to_cyl(x,y)
 	dtdx, dtdy = drtdxy[2,1], drtdxy[2,2]
 	dxy1dxy = dcyl_to_cart(r1,t1)*drt1drt*drtdxy
-	dz1dz = 1/s1
-	dz1dxy = [dz1dt*dtdx dz1dt*dtdy]
+	dz1 = [dz1dt*dtdx dz1dt*dtdy dz1dz]
 	
-	du = [dxy1dxy 0;dz1dxy dz1dz]
+	du = [dxy1dxy [0;0]]
+	du = [du;dz1]
 	return du
 end
 

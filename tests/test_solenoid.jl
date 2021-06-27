@@ -1,15 +1,15 @@
-include("../examples/lorenz.jl")
+include("../examples/solenoid.jl")
 using Test
 #using PyPlot
 function test_attractor()
-	s = [10., 28., 8.0/3]
+	s = [1.0, 4.0, 0.1]
 	u = rand(3)
-	n_runup = 20000
+	n_runup = 2000
 	for i = 1:n_runup
 		u = next(u,s)
 	end
 	@show u
-	n = 500000
+	n = 50000
 	u_trj = step(u, s, n)
 	u_trj = u_trj[:,1:10:end]	
 	x, y, z = view(u_trj,1,:), view(u_trj,2,:), view(u_trj,3,:)
@@ -25,8 +25,8 @@ function test_attractor()
 	ax.tick_params(axis="both",labelsize=36)	
 end
 function test_dstep()
-	eps = 1.e-8
-	s = [10., 28., 8.0/3]
+	eps = 1.e-6
+	s = [1., 4., 0.]
 	u = rand(3)
 	u1px = u .+ eps*[1,0,0]
 	u1mx = u .- eps*[1,0,0]
