@@ -76,6 +76,7 @@ function pert(u::Array{Float64,1}, p::Int64)
     			for indices 1 through 3")
     	return 0
     end
+	return dxyz1drtz1*drtz1ds
 end
 function dpert_x(u::Array{Float64,1},s::Array{Float64,1})
     # here we asssume s = [a, a, 0, a]
