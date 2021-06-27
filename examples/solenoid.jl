@@ -56,19 +56,24 @@ function dstep(u::Array{Float64,1},s::Array{Float64,1})
 	return du
 end
 function pert(u::Array{Float64,1}, p::Int64)
-    x, y = u[1], u[2]
-    sx, sy = sin(x), sin(2*y)/2
-    if p==1
-    	return [sx, 0]
+	x, y, z = u
+ 	r, t = cart_to_cyl(x,y)	 
+    r1 = s0 + (r - s0)/s1 + cos(t)/2
+	t1 = 2*t + 2π*s2*sin(2*t)
+	z1 = z/s1 + sin(t)/2
+	x1, y1 = cyl_to_cart(r1,t1)
+	dxyz1drtz1 = [dcyl_to_cart(r1,t1) [0;0]]
+	dxyz1drtz1 = [dxyzdrtz1; [0 0 1]] 
+
+	if p==1
+		drtz1ds = [1-1/s1; 0; 0]
     elseif p==2
-    	return [sy.*sx, 0]
+		drtz1ds = [s0/s1^2; 0; z]
     elseif p==3
-    	return [0, sy.*sx] 
-    elseif p==4
-    	return [0, sy]
+		drtz1ds = [0; 2π*sin(2*t); 0]  
     else
     	println("parameter perturbation is only defined 
-    			for indices 1 through 4")
+    			for indices 1 through 3")
     	return 0
     end
 end
