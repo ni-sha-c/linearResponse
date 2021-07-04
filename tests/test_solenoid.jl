@@ -105,14 +105,18 @@ function test_pert()
 	eps = 1.e-6
 	s = [1., 4., 0.]
 	u = rand(3)
-	sp = s .+ [0., eps, 0.]
-	sm = s .- [0., eps, 0.]
+	for i = 1:3
+		eps_arr = zeros(3)
+		eps_arr[i] = eps 
+		sp = s .+ eps_arr
+		sm = s .- eps_arr
 	
-	pp_fd = (next(u, sp) - next(u, sm))/(2*eps)
-	pp = pert(u, s)
+		pp_fd = (next(u, sp) - next(u, sm))/(2*eps)
+		pp = pert(u, s, i)
 
-	@show pp_fd, pp
-	@test pp_fd ≈ pp atol=1.e-8
+		@show pp_fd, pp
+		@test pp_fd ≈ pp atol=1.e-8
+	end
 end
 function test_pert_arr()
 	eps = 1.e-6

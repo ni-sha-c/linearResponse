@@ -55,8 +55,10 @@ function dstep(u::Array{Float64,1},s::Array{Float64,1})
 	du = [du;dz1]
 	return du
 end
-function pert(u::Array{Float64,1}, p::Int64)
+function pert(u::Array{Float64,1}, s::Array{Float64,1},
+			  p::Int64)
 	x, y, z = u
+	s0, s1, s2 = s
  	r, t = cart_to_cyl(x,y)	 
     r1 = s0 + (r - s0)/s1 + cos(t)/2
 	t1 = 2*t + 2π*s2*sin(2*t)
