@@ -103,7 +103,7 @@ function test_d2step_arr()
 end
 function test_pert()
 	eps = 1.e-6
-	s = [10., 28., 8.0/3]
+	s = [1., 4., 0.]
 	u = rand(3)
 	sp = s .+ [0., eps, 0.]
 	sm = s .- [0., eps, 0.]

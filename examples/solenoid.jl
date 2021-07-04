@@ -68,7 +68,7 @@ function pert(u::Array{Float64,1}, p::Int64)
 	if p==1
 		drtz1ds = [1-1/s1; 0; 0]
     elseif p==2
-		drtz1ds = [s0/s1^2; 0; z]
+		drtz1ds = [s0/s1^2; 0; -z/s1^2]
     elseif p==3
 		drtz1ds = [0; 2π*sin(2*t); 0]  
     else
@@ -77,15 +77,6 @@ function pert(u::Array{Float64,1}, p::Int64)
     	return 0
     end
 	return dxyz1drtz1*drtz1ds
-end
-function dpert_x(u::Array{Float64,1},s::Array{Float64,1})
-    # here we asssume s = [a, a, 0, a]
-    x, y = u[1], u[2]
-    sx, sy = sin(x), sin(2*y)/2
-    cx = cos(x)
-    dxu = 2 .+ s[1]*cx .+ s[2]*sy.*cx 
-    dxpx1 = cx + cx*sy 
-    return [dxpx1/dxu, 0.]
 end
 function d2step(u::Array{Float64,2}, s::Array{Float64,1})
     n = size(u)[2]
