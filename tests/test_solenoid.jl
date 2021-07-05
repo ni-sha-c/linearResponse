@@ -113,7 +113,7 @@ function test_pert()
 	
 		pp_fd = (next(u, sp) - next(u, sm))/(2*eps)
 		pp = pert(u, s, i)
-
+		@show i
 		@show pp_fd, pp
 		@test pp_fd ≈ pp atol=1.e-8
 	end

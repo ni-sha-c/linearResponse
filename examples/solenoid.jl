@@ -65,12 +65,12 @@ function pert(u::Array{Float64,1}, s::Array{Float64,1},
 	z1 = z/s1 + sin(t)/2
 	x1, y1 = cyl_to_cart(r1,t1)
 	dxyz1drtz1 = [dcyl_to_cart(r1,t1) [0;0]]
-	dxyz1drtz1 = [dxyzdrtz1; [0 0 1]] 
+	dxyz1drtz1 = [dxyz1drtz1; [0 0 1]] 
 
 	if p==1
 		drtz1ds = [1-1/s1; 0; 0]
     elseif p==2
-		drtz1ds = [s0/s1^2; 0; -z/s1^2]
+		drtz1ds = [-(r - s0)/s1^2; 0; -z/s1^2]
     elseif p==3
 		drtz1ds = [0; 2π*sin(2*t); 0]  
     else
