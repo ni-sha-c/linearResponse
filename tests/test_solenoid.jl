@@ -52,8 +52,9 @@ function test_dstep()
 	@test du_dz_fd ≈ du_dz atol=1.e-8
 end
 function test_d2step()
+# d2step has to be defined in the main script as below, as opposed to writing a function in solenoid.jl, because we don't want to do source-to-source AD every time the second derivative is needed.
 	eps = 1.e-6
-	s = [10., 28., 8.0/3]
+	s = [1.0, 4.0,0.1]
 	u = rand(3)
 	u1px = u .+ eps*[1,0,0]
 	u1mx = u .- eps*[1,0,0]
