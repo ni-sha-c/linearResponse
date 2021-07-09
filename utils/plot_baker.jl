@@ -167,10 +167,10 @@ function plot_mapping_vs_params()
 		
 	end
 end
-function plot_annotated_map_rectangles(s)
+function plot_annotated_map_rectangles(s, n)
 	N = 500000
-	n_gr_x = 8
-	n_gr_y = 2
+	n_gr_x = 2
+	n_gr_y = 8
 	dx = 2π/n_gr_x
 	dy = 2π/n_gr_y
 	fig = figure(figsize=(8,6))
@@ -188,7 +188,10 @@ function plot_annotated_map_rectangles(s)
 		for k = 1:n_gr_y 
 			y = (k-1)*dy
 			u1 = [[x + rand()*dx, y + rand()*dy] for i=1:N]
-			u1_next = next.(u1, Ref(s))
+			u1_next = copy(u1)
+			for m = 1:n
+				u1_next = next.(u1_next, Ref(s))
+			end
 			u1_next = hcat(u1_next...)
 			u1 = hcat(u1...)
 
@@ -204,7 +207,7 @@ function plot_annotated_map_rectangles(s)
 	ax1.xaxis.set_tick_params(labelsize=30)
 	ax.yaxis.set_tick_params(labelsize=30)
 	ax1.yaxis.set_tick_params(labelsize=30)
-
+	ax1.set_title("\$ \\varphi^{$n} \$",fontsize=32)
 	ax.axis("scaled")
 	ax1.axis("scaled")
 

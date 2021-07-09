@@ -27,7 +27,7 @@ function next(u, s)
 	s0, s1, s2 = s
 	r, t = cart_to_cyl(x, y)
 	r1 = s0 + (r - s0)/s1 + cos(t)/2
-	t1 = 2*t + 2π*s2*sin(2*t)
+	t1 = (2*t + 2π*s2*sin(2*t)) % (2π)
 	z1 = z/s1 + sin(t)/2
 	x1, y1 = cyl_to_cart(r1,t1)
     return [x1, y1, z1]
@@ -80,27 +80,9 @@ function pert(u::Array{Float64,1}, s::Array{Float64,1},
     end
 	return dxyz1drtz1*drtz1ds
 end
-function d2step(u::Array{Float64,2}, s::Array{Float64,1})
-    n = size(u)[2]
-    ddu = zeros(2,4,n)
-    for i = 1:n
-    	x, y = u[1,i], u[2,i]
-    	sx, sy = sin(x), sin(2*y)/2
-    	dsx, dsy = cos(x), cos(2*y)
-    	dxdsx, dydsy = -sin(x), -2*sin(2*y)
-    	ddu[:,1,i] = [s[1]*dxdsx + s[2]*sy*dxdsx, s[2]*dsy*dsx] 
-    	ddu[:,2,i] = [s[3]*dxdsx*sy, s[3]*dsx*dsy]
-    	ddu[:,3,i] = [s[2]*dsx*dsy, s[2]*sx*dydsy]
-    	ddu[:,4,i] = [s[3]*dsx*dsy, s[4]*dydsy + s[3]*sx*dydsy]
-    end
-    return ddu
-end
 function d2step(u::Array{Float64,1}, s::Array{Float64,1})
-    ddu = zeros(2,4)
-    x, y = u[1], u[2]
-    sx, sy = sin(x), sin(2*y)/2
-    dsx, dsy = cos(x), cos(2*y)
-    dxdsx, dydsy = -sin(x), -2*sin(2*y)
+    ddu = zeros(3,9)
+	x, y, z = u[1], u[2], u[3]
     ddu[:,1] = [s[1]*dxdsx + s[2]*sy*dxdsx, s[2]*dsy*dsx] 
     ddu[:,2] = [s[3]*dxdsx*sy, s[3]*dsx*dsy]
     ddu[:,3] = [s[2]*dsx*dsy, s[2]*sx*dydsy]
