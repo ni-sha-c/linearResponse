@@ -1,5 +1,6 @@
 include("../examples/solenoid.jl")
 using Test
+using Zygote
 #using PyPlot
 function test_attractor()
 	s = [1.0, 4.0, 0.1]
@@ -67,14 +68,19 @@ function test_d2step()
 	ddu_dy_fd = (dstep(u1py,s) - dstep(u1my,s))/(2*eps) 
 	ddu_dz_fd = (dstep(u1pz,s) - dstep(u1mz,s))/(2*eps)
 
-	ddu = d2step(u, s)
-	@show ddu[:,:,1] .- ddu_dx_fd
-	@show ddu[:,:,2] .- ddu_dy_fd
-	@show ddu[:,:,3] .- ddu_dz_fd
+	ddu(x) = jacobian(x -> dstep(x,s), x)
+	ddu_ad = ddu(u)[1]
+	ddu_dx_ad = reshape(ddu_ad[:,1],3,3)
+	ddu_dy_ad = reshape(ddu_ad[:,2],3,3)
+	ddu_dz_ad = reshape(ddu_ad[:,3],3,3)
 
-	@test ddu[:,:,1] ≈ ddu_dx_fd atol=1.e-8
-	@test ddu[:,:,2] ≈ ddu_dy_fd atol=1.e-8
-	@test ddu[:,:,3] ≈ ddu_dz_fd atol=1.e-8
+	@show ddu_dx_ad .- ddu_dx_fd
+	@show ddu_dy_ad .- ddu_dy_fd
+	@show ddu_dz_ad .- ddu_dz_fd
+
+	@test ddu_dx_ad ≈ ddu_dx_fd atol=1.e-8
+	@test ddu_dy_ad ≈ ddu_dy_fd atol=1.e-8
+	@test ddu_dz_ad ≈ ddu_dz_fd atol=1.e-8
 
 end
 function test_d2step_arr()
