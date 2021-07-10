@@ -1,21 +1,26 @@
 using JLD
 using SharedArrays
 using Distributed
-include("../examples/baker.jl")
-function obj_fun(x,y)
-		return cos(4*y)	
+include("../examples/solenoid.jl")
+function obj_fun(u)
+		return cos(4*u[1])	
 end
 function obj_fun_erg_avg(s)
 	nSteps = 10000
-	u = 2*pi*rand(2)
+	nRunup = 500
+	u = rand(d)
 	J = 0.
-	u_trj = step(u,s,nSteps-1)
-	x, y = view(u_trj,1,:), view(u_trj,2,:)
-	J = sum(obj_fun.(x,y)/nSteps)
+	for i = 1:nRunup
+		u = next(u,s)
+	end
+	for i = 1:nSteps
+		J += obj_fun(u)/nSteps
+		u = next(u,s)
+	end
 	return J
 end
 function get_Javg_vs_s(ind)
-	s = zeros(4)
+	s = [1.0, 4.0, 0.1]
 	n_pts = 10
 	n_rep = 16000
 	s_ind = LinRange(0.,1.0,n_pts)
@@ -32,7 +37,7 @@ function get_Javg_vs_s(ind)
 		wait(t)
 		J[i] = sum(J_proc) 
 	end
-	save("../data/obj_erg_avg/cos4y_s$(ind)_sens.jld",
+	save("../data/obj_erg_avg/solenoid/cos4x_s$(ind)_sens.jld",
 		 "s$ind", s_ind,
 		"J", J)
 end
