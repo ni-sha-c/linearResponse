@@ -32,7 +32,6 @@ function next(u, s)
 	x1, y1 = cyl_to_cart(r1,t1)
     return [x1, y1, z1]
 end
-
 function dstep(u::Array{Float64,1},s::Array{Float64,1})
     du = zeros(2,2)
 	s0, s1, s2 = s
@@ -79,13 +78,4 @@ function pert(u::Array{Float64,1}, s::Array{Float64,1},
     	return 0
     end
 	return dxyz1drtz1*drtz1ds
-end
-function d2step(u::Array{Float64,1}, s::Array{Float64,1})
-    ddu = zeros(3,9)
-	x, y, z = u[1], u[2], u[3]
-    ddu[:,1] = [s[1]*dxdsx + s[2]*sy*dxdsx, s[2]*dsy*dsx] 
-    ddu[:,2] = [s[3]*dxdsx*sy, s[3]*dsx*dsy]
-    ddu[:,3] = [s[2]*dsx*dsy, s[2]*sx*dydsy]
-    ddu[:,4] = [s[3]*dsx*dsy, s[4]*dydsy + s[3]*sx*dydsy]
-    return ddu
 end
