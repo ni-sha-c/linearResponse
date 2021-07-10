@@ -4,25 +4,36 @@ using JLD
 using SharedArrays
 using Distributed
 function sens(s,nSteps)
-    u = 2*pi*rand(2)
-    u_trj = step(u, s, nSteps)
-    x, y = view(u_trj,1,:), view(u_trj,2,:)
-    du_trj = dstep(u_trj, s)
-    ddu_trj = d2step(u_trj,s)
-    vs = zeros(2)
-    q = rand(2)
+    d = 3
+	s_ind = 2
+	u = rand(d)
+	
+	n_runup = 500
+	for i = 1:n_runup
+		u = next(u,s)
+	end
+	
+	dui = rand(d,d)
+	ppi = rand(d)
+	dppi = rand(d,d)
+
+	dpert(x) = jacobian(x -> pert(x,s,s_ind), x)[1]
+	d2next(x) = jacobian(x -> dstep(x,s), x)[1]
+	
+	vs = zeros(d)
+    q = rand(d)
     q /= norm(q)
 
-    pp = pert(u_trj, 2)
-    q1 = rand(2)
-    vs1 = zeros(2)
+	pp = rand(d)
+    q1 = rand(d)
+    vs1 = zeros(d)
     
     dJds_st = 0.
     dJds_ust = 0.
     N = 12
     nSteps = nSteps + 1
     g = zeros(nSteps)
-    J = cos.(4*y)
+    
     
     # Df represents the derivative of f 
     # on the 
@@ -38,16 +49,10 @@ function sens(s,nSteps)
     s2 = s[2]
     # nSteps large number.
     for i = 1:nSteps-1
-        dui = du_trj[:,:,i] # for large systems, can't store Jacobian.
-        ppi = pp[:,i]
-        xi, yi = x[i], y[i]
-        #dppi = [cos(xi) 0; cos(xi)*sin(yi) sin(xi)*cos(yi)]
-        sxi, cxi = sin(xi), cos(xi)
-        syi, cyi = sin(2*yi), cos(2*yi)
-        du11 = 2 + s2*syi*cxi/2
-        du12 = s2*sxi*cyi
-        dppi = [syi*cxi/2 cyi*sxi; 0. 0]*
-        [1/du11 -2*du12/du11; 0 2.]
+		u .= next(u, s)
+		dui .= dstep(u,s) # for large systems, can't store Jacobian.
+		ppi .= pert(u,s,s_ind)
+		dppi .= dpert(u)*inv(dui) # profile against using solve (backslash) here.                   
         q1 .= dui*q
         z = norm(q1)
         q1 ./= z
@@ -58,9 +63,8 @@ function sens(s,nSteps)
         a[i+1] = dot(vs1, q1)
         vs1 .-= a[i+1]*q1
 
-        
-        d2q = reshape([dot(ddu_trj[:,j,i],
-                    q) for j=1:4],2,2)
+		ddui = d2next(u)        
+        d2q = reshape(ddui*q,d,d)
         Dq = d2q*q/z2 + dui*Dq/z2
         dzdx = dot(z2*Dq, q1)
         Dq .= Dq .- dot(Dq,q1)*q1
@@ -75,7 +79,7 @@ function sens(s,nSteps)
         Da[i+1] += Delta_Da
         
         g[i+1] = g[i]/z - dzdx/z2 
-        dJdu = [0., -4*sin(4*yi)]
+		dJdu = [1.0, 0., 0.]
         dJds_st += dot(dJdu, vs)/nSteps
 
         vs .= vs1
