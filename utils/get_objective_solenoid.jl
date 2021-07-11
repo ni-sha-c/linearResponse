@@ -3,12 +3,12 @@ using SharedArrays
 using Distributed
 include("../examples/solenoid.jl")
 function obj_fun(u)
-		return cos(4*u[1])	
+		return u[1]/sqrt(u[1]^2 + u[2]^2)	
 end
 function obj_fun_erg_avg(s)
 	nSteps = 10000
 	nRunup = 500
-	u = rand(d)
+	u = rand(3)
 	J = 0.
 	for i = 1:nRunup
 		u = next(u,s)
@@ -21,7 +21,7 @@ function obj_fun_erg_avg(s)
 end
 function get_Javg_vs_s(ind)
 	s = [1.0, 4.0, 0.1]
-	n_pts = 10
+	n_pts = 100
 	n_rep = 16000
 	s_ind = LinRange(0.,1.0,n_pts)
 	J = zeros(n_pts)
@@ -37,7 +37,7 @@ function get_Javg_vs_s(ind)
 		wait(t)
 		J[i] = sum(J_proc) 
 	end
-	save("../data/obj_erg_avg/solenoid/cos4x_s$(ind)_sens.jld",
+	save("../data/obj_erg_avg/solenoid/cos4x_s$(ind).jld",
 		 "s$ind", s_ind,
 		"J", J)
 end
