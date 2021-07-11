@@ -27,7 +27,7 @@ function next(u, s)
 	s0, s1, s2 = s
 	r, t = cart_to_cyl(x, y)
 	r1 = s0 + (r - s0)/s1 + cos(t)/2
-	t1 = (2*t + s2/4*sin(2π*t)) % (2π)
+	t1 = (2*t + s2/4*sin(4*t)) % (2π)
 	z1 = z/s1 + sin(t)/2
 	x1, y1 = cyl_to_cart(r1,t1)
     return [x1, y1, z1]
@@ -38,10 +38,10 @@ function dstep(u::Array{Float64,1},s::Array{Float64,1})
     x, y, z = u
 	r, t = cart_to_cyl(x,y)
 	r1 = s0 + (r - s0)/s1 + cos(t)/2
-	t1 = (2*t + s2/4*sin(2π*t)) % (2π)
+	t1 = (2*t + s2/4*sin(4*t)) % (2π)
 	z1 = z/s1 + sin(t)/2
 
-	drt1drt = [1/s1 -sin(t)/2;0 2 + 2π*s2/4*cos(2π*t)]
+	drt1drt = [1/s1 -sin(t)/2;0 2 + s2*cos(4*t)]
 	dz1dt = cos(t)/2 
 	dz1dz = 1/s1
 
@@ -60,7 +60,7 @@ function pert(u::Array{Float64,1}, s::Array{Float64,1},
 	s0, s1, s2 = s
  	r, t = cart_to_cyl(x,y)	 
     r1 = s0 + (r - s0)/s1 + cos(t)/2
-	t1 = 2*t + 2π*s2*sin(2*t)
+	t1 = 2*t + s2/4*sin(4*t)
 	z1 = z/s1 + sin(t)/2
 	x1, y1 = cyl_to_cart(r1,t1)
 	dxyz1drtz1 = [dcyl_to_cart(r1,t1) [0;0]]
@@ -71,7 +71,7 @@ function pert(u::Array{Float64,1}, s::Array{Float64,1},
     elseif p==2
 		drtz1ds = [-(r - s0)/s1^2; 0; -z/s1^2]
     elseif p==3
-		drtz1ds = [0; 2π*sin(2*t); 0]  
+		drtz1ds = [0; (1/4)*sin(4*t); 0]  
     else
     	println("parameter perturbation is only defined 
     			for indices 1 through 3")
