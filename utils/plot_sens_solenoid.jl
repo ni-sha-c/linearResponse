@@ -6,7 +6,7 @@ function plot_lines()
 	dJds = X["dJds"]
 
 	X = load("../data/obj_erg_avg/solenoid/cos4x_s3.jld")
-    s3 = X["s"]
+    s3 = X["s3"]
     J = X["J"]
     fig, ax = subplots(1,1)
     ax.plot(s3, J, ".", ms=25.0)
@@ -20,12 +20,12 @@ function plot_lines()
 
 	X = load("../data/obj_erg_avg/solenoid/cos4x_s3_sens.jld")
 	J = X["J"]
-	s3 = X["s"]
+	s3 = X["s3"]
 	
 	n = size(dJds)[1]
 	J_pts = reshape([J .- eps*dJds J .+ eps*dJds], n,
                     2)'
-    s_pts = reshape([s2 .- eps s2 .+ eps], n,
+    s_pts = reshape([s3 .- eps s3 .+ eps], n,
                     2)'
 
     ax.plot(s_pts[:,1:n-1], J_pts[:,1:n-1], "k",lw=3.0)
