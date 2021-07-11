@@ -21,7 +21,7 @@ function obj_fun_erg_avg(s)
 end
 function get_Javg_vs_s(ind)
 	s = [1.0, 4.0, 0.1]
-	n_pts = 100
+	n_pts = 20
 	n_rep = 16000
 	s_ind = LinRange(0.,1.0,n_pts)
 	J = zeros(n_pts)
@@ -37,7 +37,7 @@ function get_Javg_vs_s(ind)
 		wait(t)
 		J[i] = sum(J_proc) 
 	end
-	save("../data/obj_erg_avg/solenoid/cos4x_s$(ind).jld",
+	save("../data/obj_erg_avg/solenoid/cos4x_s$(ind)_sens.jld",
 		 "s$ind", s_ind,
 		"J", J)
 end

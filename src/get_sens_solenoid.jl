@@ -3,6 +3,7 @@ using LinearAlgebra
 using JLD
 using SharedArrays
 using Distributed
+using Zygote
 function sens(s,nSteps)
     d = 3
 	s_ind = 3
