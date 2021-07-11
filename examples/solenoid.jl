@@ -27,7 +27,7 @@ function next(u, s)
 	s0, s1, s2 = s
 	r, t = cart_to_cyl(x, y)
 	r1 = s0 + (r - s0)/s1 + cos(t)/2
-	t1 = (2*t + 2π*s2*sin(2*t)) % (2π)
+	t1 = (2*t + s2/4*sin(2π*t)) % (2π)
 	z1 = z/s1 + sin(t)/2
 	x1, y1 = cyl_to_cart(r1,t1)
     return [x1, y1, z1]
@@ -38,10 +38,10 @@ function dstep(u::Array{Float64,1},s::Array{Float64,1})
     x, y, z = u
 	r, t = cart_to_cyl(x,y)
 	r1 = s0 + (r - s0)/s1 + cos(t)/2
-	t1 = 2*t + 2π*s2*sin(2*t)
+	t1 = (2*t + s2/4*sin(2π*t)) % (2π)
 	z1 = z/s1 + sin(t)/2
 
-	drt1drt = [1/s1 -sin(t)/2;0 2 + 4π*s2*cos(2*t)]
+	drt1drt = [1/s1 -sin(t)/2;0 2 + 2π*s2/4*cos(2π*t)]
 	dz1dt = cos(t)/2 
 	dz1dz = 1/s1
 
