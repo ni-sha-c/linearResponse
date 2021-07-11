@@ -69,12 +69,12 @@ function sens(s,nSteps)
         ddui = d2next(u)        
         d2q = reshape(ddui*q,d,d)
         Dq = d2q*q/z2 + dui*Dq/z2
-        dzdx = dot(z2*Dq, q1)
+        dzdx = dot(z*Dq, q1)
         Dq .= Dq .- dot(Dq,q1)*q1
         
 
 
-        Dvs1 .= d2q*vs/z + dui*Dvs/z + dppi*q1/z
+        Dvs1 .= d2q*vs/z + dui*Dvs/z + dppi*q1
         Da[i+1] = dot(vs1, Dq) + dot(Dvs1, q1)
         Dvs1 .= Dvs1 - Da[i+1]*q1 - a[i+1]*Dq
         Delta_Da = dot(Dvs1, q1) + dot(vs1, Dq) 
