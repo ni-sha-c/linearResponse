@@ -3,7 +3,7 @@ using SharedArrays
 using Distributed
 include("../examples/solenoid.jl")
 function obj_fun(u)
-		return u[1]/sqrt(u[1]^2 + u[2]^2)	
+	return u[1]^2 + u[2]^2	
 end
 function obj_fun_erg_avg(s)
 	nSteps = 10000
