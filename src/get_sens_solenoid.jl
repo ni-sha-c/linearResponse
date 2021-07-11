@@ -1,11 +1,11 @@
-include("../examples/baker.jl")
+include("../examples/solenoid.jl")
 using LinearAlgebra
 using JLD
 using SharedArrays
 using Distributed
 function sens(s,nSteps)
     d = 3
-	s_ind = 2
+	s_ind = 3
 	u = rand(d)
 	
 	n_runup = 500
@@ -40,15 +40,18 @@ function sens(s,nSteps)
     # unstable manifold.
     # Xu = a q
     # d = 2
-    Xu = zeros(2, nSteps)
+    Xu = zeros(d, nSteps)
     a = zeros(nSteps)
+	J = zeros(nSteps)
     Da = zeros(nSteps)
-    Dq = zeros(2)
-    Dvs = zeros(2)
-    Dvs1 = zeros(2)
-    s2 = s[2]
+    Dq = zeros(d)
+    Dvs = zeros(d)
+    Dvs1 = zeros(d)
+    
     # nSteps large number.
     for i = 1:nSteps-1
+		J[i] = u[1]*u[1] + u[2]*u[2]	
+		dJdu = [2*u[1], 2*u[2], 0.]
 		u .= next(u, s)
 		dui .= dstep(u,s) # for large systems, can't store Jacobian.
 		ppi .= pert(u,s,s_ind)
@@ -79,7 +82,7 @@ function sens(s,nSteps)
         Da[i+1] += Delta_Da
         
         g[i+1] = g[i]/z - dzdx/z2 
-		dJdu = [1.0, 0., 0.]
+
         dJds_st += dot(dJdu, vs)/nSteps
 
         vs .= vs1
@@ -102,7 +105,7 @@ function sens(s,nSteps)
 end
 function get_sens(s)
     nSteps = 500000
-    # J = cos(4y)
+    # J = r2
     n_exps = size(s)[2]
     dJds = zeros(n_exps)
     n_rep = 16
@@ -117,7 +120,7 @@ function get_sens(s)
         dJds[k] = sum(dJds_proc)
         @show dJds[k]
     end
-    save("../data/sens/dJds_s2.jld", "s2",
-         s[2,:], "dJds", dJds)
+    save("../data/sens/solenoid/dJds_s3.jld", "s",
+         s[3,:], "dJds", dJds)
 end
     
