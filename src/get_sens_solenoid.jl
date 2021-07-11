@@ -31,7 +31,7 @@ function sens(s,nSteps)
     
     dJds_st = 0.
     dJds_ust = 0.
-    N = 20
+    N = 12
     nSteps = nSteps + 1
     g = zeros(nSteps)
     
@@ -64,7 +64,7 @@ function sens(s,nSteps)
         
         vs1 .= dui*vs + ppi
         a[i+1] = dot(vs1, q1)
-		vs1 .-= a[i+1]*q1
+        vs1 .-= a[i+1]*q1
 
         ddui = d2next(u)        
         d2q = reshape(ddui*q,d,d)
