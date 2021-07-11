@@ -31,7 +31,7 @@ function sens(s,nSteps)
     
     dJds_st = 0.
     dJds_ust = 0.
-    N = 12
+    N = 24
     nSteps = nSteps + 1
     g = zeros(nSteps)
     
@@ -121,7 +121,7 @@ function get_sens(s)
         dJds[k] = sum(dJds_proc)
         @show dJds[k]
     end
-    save("../data/sens/solenoid/dJds_s3.jld", "s",
+    save("../data/sens/solenoid/dJds_s3_K24.jld", "s",
          s[3,:], "dJds", dJds)
 end
     
