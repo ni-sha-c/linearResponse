@@ -6,32 +6,32 @@ using Distributed
 using Zygote
 function sens(s,nSteps)
     d = 3
-	s_ind = 3
-	u = rand(d)
-	
-	n_runup = 500
-	for i = 1:n_runup
-		u = next(u,s)
-	end
-	
-	dui = rand(d,d)
-	ppi = rand(d)
-	dppi = rand(d,d)
+    s_ind = 3
+    u = rand(d)
+    
+    n_runup = 500
+    for i = 1:n_runup
+        u = next(u,s)
+    end
+    
+    dui = rand(d,d)
+    ppi = rand(d)
+    dppi = rand(d,d)
 
-	dpert(x) = jacobian(x -> pert(x,s,s_ind), x)[1]
-	d2next(x) = jacobian(x -> dstep(x,s), x)[1]
-	
-	vs = zeros(d)
+    dpert(x) = jacobian(x -> pert(x,s,s_ind), x)[1]
+    d2next(x) = jacobian(x -> dstep(x,s), x)[1]
+    
+    vs = zeros(d)
     q = rand(d)
     q /= norm(q)
 
-	pp = rand(d)
+    pp = rand(d)
     q1 = rand(d)
     vs1 = zeros(d)
     
     dJds_st = 0.
     dJds_ust = 0.
-    N = 24
+    N = 20
     nSteps = nSteps + 1
     g = zeros(nSteps)
     
@@ -43,7 +43,7 @@ function sens(s,nSteps)
     # d = 2
     Xu = zeros(d, nSteps)
     a = zeros(nSteps)
-	J = zeros(nSteps)
+    J = zeros(nSteps)
     Da = zeros(nSteps)
     Dq = zeros(d)
     Dvs = zeros(d)
@@ -51,12 +51,11 @@ function sens(s,nSteps)
     
     # nSteps large number.
     for i = 1:nSteps-1
-		J[i] = u[1]*u[1] + u[2]*u[2]	
-		dJdu = [2*u[1], 2*u[2], 0.]
-		u .= next(u, s)
-		dui .= dstep(u,s) # for large systems, can't store Jacobian.
-		ppi .= pert(u,s,s_ind)
-		dppi .= dpert(u)*inv(dui) # profile against using solve (backslash) here.                   
+        J[i] = u[1]*u[1] + u[2]*u[2]    
+        dJdu = [2*u[1], 2*u[2], 0.]
+	ppi .= pert(u,s,s_ind)
+        dui .= dstep(u,s) # for large systems, can't store Jacobian.
+        dppi .= dpert(u)*inv(dui) # profile against using solve (backslash) here.                   
         q1 .= dui*q
         z = norm(q1)
         q1 ./= z
@@ -67,7 +66,7 @@ function sens(s,nSteps)
         a[i+1] = dot(vs1, q1)
         vs1 .-= a[i+1]*q1
 
-		ddui = d2next(u)        
+        ddui = d2next(u)        
         d2q = reshape(ddui*q,d,d)
         Dq = d2q*q/z2 + dui*Dq/z2
         dzdx = dot(z2*Dq, q1)
@@ -89,7 +88,7 @@ function sens(s,nSteps)
         vs .= vs1
         q .= q1
         Dvs .= Dvs1
-
+        u .= next(u,s)
 
     end
     for n = 1:N
@@ -105,7 +104,7 @@ function sens(s,nSteps)
     return dJds_st + dJds_ust
 end
 function get_sens(s)
-    nSteps = 500000
+    nSteps = 200000
     # J = r2
     n_exps = size(s)[2]
     dJds = zeros(n_exps)
@@ -121,7 +120,7 @@ function get_sens(s)
         dJds[k] = sum(dJds_proc)
         @show dJds[k]
     end
-    save("../data/sens/solenoid/dJds_s3_K24.jld", "s",
+    save("../data/sens/solenoid/dJds_s3_K20.jld", "s",
          s[3,:], "dJds", dJds)
 end
     
