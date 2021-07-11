@@ -53,7 +53,7 @@ function sens(s,nSteps)
     for i = 1:nSteps-1
         J[i] = u[1]*u[1] + u[2]*u[2]    
         dJdu = [2*u[1], 2*u[2], 0.]
-	ppi .= pert(u,s,s_ind)
+	    ppi .= pert(u,s,s_ind)
         dui .= dstep(u,s) # for large systems, can't store Jacobian.
         dppi .= dpert(u)*inv(dui) # profile against using solve (backslash) here.                   
         q1 .= dui*q
@@ -64,7 +64,7 @@ function sens(s,nSteps)
         
         vs1 .= dui*vs + ppi
         a[i+1] = dot(vs1, q1)
-        vs1 .-= a[i+1]*q1
+		vs1 .-= a[i+1]*q1
 
         ddui = d2next(u)        
         d2q = reshape(ddui*q,d,d)
@@ -77,11 +77,10 @@ function sens(s,nSteps)
         Dvs1 .= d2q*vs/z + dui*Dvs/z + dppi*q1
         Da[i+1] = dot(vs1, Dq) + dot(Dvs1, q1)
         Dvs1 .= Dvs1 - Da[i+1]*q1 - a[i+1]*Dq
-        Delta_Da = dot(Dvs1, q1) + dot(vs1, Dq) 
-        Dvs1 .-= Delta_Da*q
-        Da[i+1] += Delta_Da
         
-        g[i+1] = g[i]/z - dzdx/z2 
+
+
+        g[i+1] = g[i]/z - dzdx/z 
 
         dJds_st += dot(dJdu, vs)/nSteps
 
