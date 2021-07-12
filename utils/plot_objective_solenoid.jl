@@ -1,7 +1,7 @@
 using PyPlot
 using JLD
 function plot_obj_erg_avg(ind)
-	X = load("../data/obj_erg_avg/solenoid/cos4x_s$(ind).jld")
+	X = load("../data/obj_erg_avg/solenoid/r2_s$(ind).jld")
 	s4 = X["s$ind"]
 	J = X["J"]
 	fig, ax = subplots(1,1)
@@ -11,7 +11,7 @@ function plot_obj_erg_avg(ind)
 	ax.xaxis.set_tick_params(labelsize=28)
 	ax.yaxis.set_tick_params(labelsize=28)
 	ax.set_xlabel("\$ s_$(ind) \$", fontsize=28)
-	ax.set_ylabel(L"\langle \cos(4 x^{(1)})\rangle", fontsize=28)
+	ax.set_ylabel(L"\langle J \rangle", fontsize=28)
 end
 function plot_obj_fun()
 

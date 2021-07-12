@@ -1,7 +1,7 @@
 using PyPlot
 using JLD
 function plot_lines()
-		X = load("../data/sens/solenoid/dJds_s3_K24.jld")
+	X = load("../data/sens/solenoid/dJds_s3_K12.jld")
 	rho = X["s"]
 	dJds = X["dJds"]
 
@@ -9,14 +9,14 @@ function plot_lines()
     s3 = X["s3"]
     J = X["J"]
     fig, ax = subplots(1,1)
-    ax.plot(s3, J, ".", ms=25.0)
+    ax.plot(s3, J, ".", ms=10.0)
     ax.xaxis.set_tick_params(labelsize=28)
     ax.yaxis.set_tick_params(labelsize=28)
-    ax.set_xlabel(L"$s_2$",fontsize=28)
+    ax.set_xlabel("parameter",fontsize=28)
     ax.set_ylabel(L"$\langle J\rangle$",fontsize=28)
     ax.grid(true)
 
-    eps = 1e-1
+    eps = 1.5e-2
 
 	X = load("../data/obj_erg_avg/solenoid/cos4x_s3_sens.jld")
 	J = X["J"]
