@@ -6,7 +6,7 @@ using Distributed
 using Zygote
 function sens(s,nSteps)
     d = 3
-    s_ind = 3
+    s_ind = 1
     u = rand(d)
     
     n_runup = 500
@@ -53,7 +53,7 @@ function sens(s,nSteps)
     for i = 1:nSteps-1
         J[i] = u[1]*u[1] + u[2]*u[2]    
         dJdu = [2*u[1], 2*u[2], 0.]
-	    ppi .= pert(u,s,s_ind)
+	ppi .= pert(u,s,s_ind)
         dui .= dstep(u,s) # for large systems, can't store Jacobian.
         dppi .= dpert(u)*inv(dui) # profile against using solve (backslash) here.                   
         q1 .= dui*q
@@ -119,7 +119,7 @@ function get_sens(s)
         dJds[k] = sum(dJds_proc)
         @show dJds[k]
     end
-    save("../data/sens/solenoid/dJds_s3_K20.jld", "s",
-         s[3,:], "dJds", dJds)
+    save("../data/sens/solenoid/dJds_s1_K12.jld", "s",
+         s[1,:], "dJds", dJds)
 end
     

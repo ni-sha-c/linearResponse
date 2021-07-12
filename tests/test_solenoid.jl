@@ -1,9 +1,9 @@
 include("../examples/solenoid.jl")
 using Test
 using Zygote
-#using PyPlot
+using PyPlot
 function test_attractor()
-	s = [1.0, 4.0, 0.1]
+	s = [1.0, 4.0, 0.0]
 	u = rand(3)
 	n_runup = 2000
 	for i = 1:n_runup
