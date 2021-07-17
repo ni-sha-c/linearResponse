@@ -6,7 +6,7 @@ using Distributed
 using Zygote
 function sens(s,nSteps)
     d = 3
-    s_ind = 1
+    s_ind = 3
     u = rand(d)
     
     n_runup = 500
@@ -103,11 +103,12 @@ function sens(s,nSteps)
     return dJds_st + dJds_ust
 end
 function get_sens(s)
-    nSteps = 200000
+    nSteps = 60000
     # J = r2
     n_exps = size(s)[2]
     dJds = zeros(n_exps)
-    n_rep = 16
+    n_rep = 160000
+    n_samples = nSteps*n_rep
     dJds_proc = SharedArray{Float64}(n_rep)
     for k=1:n_exps
         sk = s[:,k]
@@ -119,7 +120,6 @@ function get_sens(s)
         dJds[k] = sum(dJds_proc)
         @show dJds[k]
     end
-    save("../data/sens/solenoid/dJds_s1_K12.jld", "s",
+    save("../data/sens/solenoid/dJds_K12_$(n_samples).jld", "s",
          s[1,:], "dJds", dJds)
 end
-    
