@@ -1,21 +1,18 @@
 using JLD
 n_min = 32000
 n_max = 320000000
-filename = "../data/sens/solenoid/dJds_K12_"
+dirname = "../data/sens/solenoid/dJds_vs_N"
 function read_data()
-    n = n_min
-    i = 1
-	nn = Integer(log10(n_max/n_min)) + 2
-	n_samples = ones(Int64,nn)
-	dJds = zeros(nn)
-	while n <= n_max
-	    X = load(string(filename, n, ".jld"))
-	    dJds[i] = X["dJds"][1]
-		n_samples[i] = n
-	    @show n, dJds[i]
-	    i = i + 1
-	    n = n*10
-    end
-	save("../data/sens/solenoid/dJds3_K12_N.jld",
+    filenames = readdir(dirname)
+	npts = size(filenames)[1]
+	n_samples = zeros(Int64, npts)
+	dJds = zeros(npts)
+	for (i, filename) in enumerate(filenames)
+			n_samples[i] = parse(Int64, split(filename, ".")[1])
+			X = load(string(dirname,"/",filename))
+			dJds[i] = X["dJds"][1]
+	end
+
+	save("../data/sens/solenoid/dJds3.jld",
 		 "dJds", dJds, "n_samples", n_samples)
 end	
