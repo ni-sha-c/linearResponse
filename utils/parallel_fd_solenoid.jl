@@ -1,4 +1,4 @@
 using Distributed
-addprocs(16)
+addprocs(4)
 @everywhere include("get_objective_difference_solenoid.jl")
-get_JavgN(0.05)
+get_JavgN(0.001)

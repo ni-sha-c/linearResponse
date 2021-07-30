@@ -20,23 +20,22 @@ function obj_fun_erg_avg(s, nSteps)
 end
 function get_JavgN(sind)
 	s = [1.0, 4.0, sind]
-	n_rep = 16
-	n_pts = 2
+	n_rep = 160
+	n_pts = 8
 	J = zeros(n_pts)
 	J_proc = SharedArray{Float64}(n_rep)
 	J_proc .= 0.
-	Ni = 100
+	Ni = 1200
+	N = zeros(Int64, n_pts)
 	for i = 1:n_pts
+		N[i] = Ni*n_rep
+		@show Ni
 		t = @distributed for n=1:n_rep
-			J_proc[n] = obj_fun_erg_avg(s,Ni)/(n_rep*Ni)
+			J_proc[n] = obj_fun_erg_avg(s,Ni)/n_rep
 		end
 		wait(t)
 		J[i] = sum(J_proc) 
 		Ni = Ni*5
 	end
-	save("../data/obj_erg_avg/solenoid/r2_$(sind).jld",
-		 "s", s_ind,
-		"J", J)
+	save("../data/finiteDifference/solenoid/r2_$(sind).jld","s", sind,"J", J, "N", N)
 end
-
-
