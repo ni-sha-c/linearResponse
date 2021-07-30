@@ -35,7 +35,7 @@ function get_JavgN(sind)
 		Ni = Ni*5
 	end
 	save("../data/obj_erg_avg/solenoid/r2_$(sind).jld",
-		 "s", s_ind,
+		 "s", sind,
 		"J", J)
 end
 
