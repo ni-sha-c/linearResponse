@@ -1,6 +1,4 @@
 using JLD
-n_min = 32000
-n_max = 320000000
 dirname = "../data/sens/solenoid/dJds_vs_N"
 function read_data()
     filenames = readdir(dirname)
