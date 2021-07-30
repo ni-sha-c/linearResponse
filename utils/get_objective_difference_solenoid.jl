@@ -5,8 +5,7 @@ include("../examples/solenoid.jl")
 function obj_fun(u)
 	return u[1]^2 + u[2]^2	
 end
-function obj_fun_erg_avg(s)
-	nSteps = 10000
+function obj_fun_erg_avg(s, nSteps)
 	nRunup = 500
 	u = rand(3)
 	J = 0.
@@ -19,26 +18,24 @@ function obj_fun_erg_avg(s)
 	end
 	return J
 end
-function get_Javg_vs_s(ind)
-	s = [1.0, 4.0, 0]
-	n_pts = 20
-	n_rep = 16000
-	s_ind = LinRange(1.,2.0,n_pts)
+function get_JavgN(sind)
+	s = [1.0, 4.0, sind]
+	n_rep = 16
+	n_pts = 2
 	J = zeros(n_pts)
 	J_proc = SharedArray{Float64}(n_rep)
+	J_proc .= 0.
+	Ni = 100
 	for i = 1:n_pts
-		@show s_ind[i]
-		s[ind] = s_ind[i]
-		#s[3] = s_ind[i]
-		J_proc .= 0.
 		t = @distributed for n=1:n_rep
-			J_proc[n] = obj_fun_erg_avg(s)/n_rep
+			J_proc[n] = obj_fun_erg_avg(s,Ni)/(n_rep*Ni)
 		end
 		wait(t)
 		J[i] = sum(J_proc) 
+		Ni = Ni*5
 	end
-	save("../data/obj_erg_avg/solenoid/r2_s$(ind)_sens.jld",
-		 "s$ind", s_ind,
+	save("../data/obj_erg_avg/solenoid/r2_$(sind).jld",
+		 "s", s_ind,
 		"J", J)
 end
 
