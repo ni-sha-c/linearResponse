@@ -91,7 +91,7 @@ function sens(s,nSteps)
         u .= next(u,s)
 
     end
-    x[:,end] = u
+    x_trj[:,end] = u
     for n = 1:N
         J_shift = J[n+1:end]
         nJ = length(J_shift)
