@@ -47,7 +47,7 @@ function sens(s,nSteps)
     Dvs = zeros(d)
     Dvs1 = zeros(d)
     normvs = zeros(nSteps)
-
+    x_trj = zeros(3,nSteps)
     # nSteps large number.
     for i = 1:nSteps-1
         J[i] = u[1]*u[1] + u[2]*u[2]    
@@ -83,14 +83,15 @@ function sens(s,nSteps)
 
         dJds_st += dot(dJdu, vs)/nSteps
         
-		normvs[i+1] = norm(vs1)
-
+        normvs[i+1] = norm(vs1)
+        x_trj[:,i] = u
         vs .= vs1
         q .= q1
         Dvs .= Dvs1
         u .= next(u,s)
 
     end
+    x[:,end] = u
     for n = 1:N
         J_shift = J[n+1:end]
         nJ = length(J_shift)
@@ -101,8 +102,9 @@ function sens(s,nSteps)
         dJds_ust -= dot(J_shift,g_shift.*a_shift)/nJ
     end
     save("../data/sens/solenoid/metrics_$(nSteps).jld", 
-		 "a", a, "normvs", normvs, "b", Da, "g", g, 
+		 "a", a, "normvs", normvs, "b", Da, "g", g,
+		 "x_trj", x_trj,
 		 "dJds_st", dJds_st, "dJds_ust", dJds_ust)
-	return dJds_st + dJds_ust
+    return dJds_st + dJds_ust
 end
 
