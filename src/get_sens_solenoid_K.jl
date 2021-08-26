@@ -29,7 +29,6 @@ function sens(s,nSteps)
     
     dJds_st = 0.
     dJds_ust = 0.
-    N = 12
     nSteps = nSteps + 1
     g = zeros(nSteps)
     
@@ -46,9 +45,8 @@ function sens(s,nSteps)
     Dq = zeros(d)
     Dvs = zeros(d)
     Dvs1 = zeros(d)
-    normvs = zeros(nSteps)
-    x_trj = zeros(3,nSteps)
     # nSteps large number.
+	N = 24
     for i = 1:nSteps-1
         J[i] = u[1]*u[1] + u[2]*u[2]    
         dJdu = [2*u[1], 2*u[2], 0.]
@@ -83,28 +81,24 @@ function sens(s,nSteps)
 
         dJds_st += dot(dJdu, vs)/nSteps
         
-        normvs[i+1] = norm(vs1)
-        x_trj[:,i] = u
         vs .= vs1
         q .= q1
         Dvs .= Dvs1
         u .= next(u,s)
 
     end
-    x_trj[:,end] = u
-    for n = 1:N
+	dJds_ust_K = zeros(N)
+	for n = 1:N
         J_shift = J[n+1:end]
         nJ = length(J_shift)
         g_shift = g[2:nJ+1]
         Da_shift = Da[2:nJ+1]
         a_shift = a[2:nJ+1]
-        dJds_ust -= dot(J_shift,Da_shift)/nJ 
-        dJds_ust -= dot(J_shift,g_shift.*a_shift)/nJ
+		dJds_ust_K[n] = -dot(J_shift,Da_shift .+ g_shift.*a_shift)/nJ
+        dJds_ust += dJds_ust_K[n]
     end
-    save("../data/sens/solenoid/metrics_$(nSteps).jld", 
-		 "a", a, "normvs", normvs, "b", Da, "g", g,
-		 "x_trj", x_trj,
-		 "dJds_st", dJds_st, "dJds_ust", dJds_ust)
+    save("../data/sens/solenoid/metrics_$(nSteps)_K.jld", "unstable_contribution_k", dJds_ust_K, "dJds_ust", dJds_ust, "dJds_st", dJds_st)
+
     return dJds_st + dJds_ust
 end
 

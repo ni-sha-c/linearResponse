@@ -1,3 +1,3 @@
-include("../src/get_sens_solenoid_metrics.jl")
+include("../src/get_sens_solenoid_metrics_K.jl")
 s = [1.0, 4.0, 0.0]
-sens(s, 100000)
+sens(s, 200000)
