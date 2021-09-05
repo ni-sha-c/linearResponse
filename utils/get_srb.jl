@@ -81,9 +81,9 @@ function compute_indicator_density(s)
 
     rho = zeros(n_xbins, n_ybins)
     rho .= 0.
-    n_step = 5000
+    n_step = 100000
     n_spl = nprocs() - 1 
-    n_rep = 5000
+    n_rep = 1000
     rho_proc = SharedArray{Float64}(n_xbins*n_ybins,
                      n_spl)
 
@@ -108,7 +108,7 @@ function compute_indicator_density(s)
         end
         
     end
-    save(string("../data/SRB_dist/verify/ind_dist_50_", 
+    save(string("../data/SRB_dist/verify/ind_dist_", 
                 "$s","_.jld"), "rho", rho)
 end
 function get_dist()

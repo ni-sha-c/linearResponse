@@ -64,3 +64,26 @@ function plot_density()
 		ax.set_title("s = $s ",fontsize=28)
 	end
 end
+function plot_SRB_verify()
+	#assumes get_dist() has been run
+	fp = "../data/SRB_dist/verify/"
+	files = readdlm(string(fp, "files"), '\n')
+	for (i, f) = enumerate(files)
+		filename = string(fp, string(f))
+		X = load(filename)
+		rho = X["rho"]
+		n_x, n_y = size(rho)
+		x = LinRange(0.,2*pi,n_x)
+		y = LinRange(0.,2*pi,n_y)
+		x_g = repeat(x, 1, n_y)
+		y_g = repeat(y', n_x, 1)
+		fig, ax = subplots(1,1)
+		cplot = ax.contourf(x_g, y_g, rho,
+					   cmap="Blues")
+		cbar = fig.colorbar(cplot,ax=ax)
+		ax.xaxis.set_tick_params(labelsize=28)
+		ax.yaxis.set_tick_params(labelsize=28)
+		cbar.ax.tick_params(labelsize=28)
+		ax.set_title(string("bins =  ", n_x*n_y),fontsize=28)
+	end
+end
