@@ -7,7 +7,8 @@ dJds_st = X["dJds_st"]
 ust_cn_k = X["unstable_contribution_k"]
 K = size(ust_cn_k)[1]
 fig, ax = subplots()
-ust_pge = abs.((cumsum(ust_cn_k) .- dJds_ust)./dJds_ust)*100 
+#ust_pge = abs.((cumsum(ust_cn_k) .- dJds_ust)./dJds_ust)*100 
+ust_pge = abs.(ust_cn_k./dJds_ust)*100
 ax.semilogy(1:K, ust_pge, "ko-", ms=20, lw=2.5, label="% error in sum of k terms")
 ax.set_xlabel("k",fontsize=28)
 ax.xaxis.set_tick_params(labelsize=28)
