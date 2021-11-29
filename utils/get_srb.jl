@@ -108,7 +108,7 @@ function compute_indicator_density(s)
         end
         
     end
-    save(string("../data/SRB_dist/new/ind_dist_2mil", 
+    save(string("../data/SRB_dist/new/ind_dist_32mil", 
                 "$s","_.jld"), "rho", rho)
 end
 function get_dist()
