@@ -76,14 +76,14 @@ function compute_smooth_approx_density(s)
                 "$s","_.jld"), "rho", rho)
 end
 function compute_indicator_density(s)
-    n_xbins, n_ybins = 100, 100
+    n_xbins, n_ybins = 400, 729
     dx, dy = 2*pi/n_xbins, 2*pi/n_ybins
 
     rho = zeros(n_xbins, n_ybins)
     rho .= 0.
     n_step = 2000000
     n_spl = nprocs() - 1 
-    n_rep = 1000
+    n_rep = 50000
     rho_proc = SharedArray{Float64}(n_xbins*n_ybins,
                      n_spl)
 
@@ -108,11 +108,11 @@ function compute_indicator_density(s)
         end
         
     end
-    save(string("../data/SRB_dist/new/ind_dist_32mil", 
+    save(string("../data/SRB_dist/new/ind_dist_1.5tr", 
                 "$s","_.jld"), "rho", rho)
 end
 function get_dist()
     s = zeros(4)
-    s[1] = 0.2
+    s[2] = 0.2
     compute_indicator_density(s)
 end
